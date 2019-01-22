@@ -1,0 +1,16 @@
+{
+"missions":[
+				{"waypoints": [
+				  {"X_in_meter": "0", "Y_in_meter": "0", "Z_in_meter": "0"},
+			      {"X_in_meter": "100", "Y_in_meter": "0", "Z_in_meter": "5"},
+			      {"X_in_meter": "100", "Y_in_meter": "100", "Z_in_meter": "5"},
+			      {"X_in_meter": "0", "Y_in_meter": "100", "Z_in_meter": "5"},
+			      {"X_in_meter": "0", "Y_in_meter": "0", "Z_in_meter": "5"},
+			      {"X_in_meter": "-100", "Y_in_meter": "0", "Z_in_meter": "5"},
+			      {"X_in_meter": "-100", "Y_in_meter": "-100", "Z_in_meter": "5"},
+			      {"X_in_meter": "0", "Y_in_meter": "-100", "Z_in_meter": "5"},
+			      {"X_in_meter": "0", "Y_in_meter": "0", "Z_in_meter": "5"}
+			    ]}
+			]
+
+}
