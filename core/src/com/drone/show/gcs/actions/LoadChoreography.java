@@ -1,4 +1,4 @@
-package com.drone.show.gcs.scenarii;
+package com.drone.show.gcs.actions;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -10,6 +10,8 @@ import com.badlogic.gdx.files.FileHandle;
 import com.drone.show.GlobalManager;
 import com.drone.show.gcs.MavLinkToolKit;
 import com.drone.show.gcs.MavlinkCommunicationModel;
+import com.drone.show.gcs.scenarii.Choreography;
+import com.drone.show.gcs.scenarii.Waypoint;
 import com.drone.show.generic.Timer;
 import com.drone.show.generic.Tools;
 import com.drone.show.hud.models.ApplicationModel;
@@ -31,14 +33,16 @@ import io.dronefleet.mavlink.common.ParamValue;
  * Load choreogrphy to N Drones
  */
 
-public class ChoreographyManager implements PropertyChangeListener{
+public class LoadChoreography extends Action implements PropertyChangeListener{
 
+	
 	private MavlinkConnection connection;
 
 	private static final float HERTZ = 5.0f; //frequence d'envoie de la commande
 	private Timer commandTimer;
-	//Pour etre sur qu on recoit pas des missionack de la commande precedent MissionClear
-	//alors qu on est sur la sequence REQUEST_ITEM qui retourne un mission ack aussi
+	/** Pour etre sur qu on recoit pas des MissionAck de la commande precedent MissionClear
+	 * alors qu on est sur la sequence REQUEST_ITEM qui retourne un MissionAck aussi
+	 */
 	private Timer missionClearTimer;
 
 
@@ -69,22 +73,22 @@ public class ChoreographyManager implements PropertyChangeListener{
 
 
 
-	public ChoreographyManager(MavlinkConnection connection, String filename, float origLatitude, float origLongitude){
+	public LoadChoreography(MavlinkConnection connection, String filename, float origLatitude, float origLongitude){
 		this(connection, origLatitude, origLongitude);
 
-		Choreography choreography = getChoreographyFromJson(filename);
+		Choreography choreography = LoadChoreography.getChoreographyFromJson(filename);
 		this.choreography = choreography;
 		this.numberOfDrones = this.choreography.missions.size();
 	}
 
-	public ChoreographyManager(MavlinkConnection connection, Choreography choreography, float origLatitude, float origLongitude){
+	public LoadChoreography(MavlinkConnection connection, Choreography choreography, float origLatitude, float origLongitude){
 		this(connection, origLatitude, origLongitude);
 		this.choreography = choreography;
 		this.numberOfDrones = this.choreography.missions.size();
 	}
 
 
-	public ChoreographyManager(MavlinkConnection connection, float origLatitude, float origLongitude){
+	public LoadChoreography(MavlinkConnection connection, float origLatitude, float origLongitude){
 
 		GlobalManager.realWorldDroneModel.addPropertyChangeListener(this);
 
@@ -108,7 +112,7 @@ public class ChoreographyManager implements PropertyChangeListener{
 
 
 
-	public Choreography getChoreographyFromJson(String filename) {
+	public static Choreography getChoreographyFromJson(String filename) {
 
 		FileHandle handle = Gdx.files.internal(filename);
 		String json = handle.readString();
@@ -128,26 +132,14 @@ public class ChoreographyManager implements PropertyChangeListener{
 
 
 
-
+	@Override
 	public void update() {
-
+		super.update();
 
 		if(!this.ischoregraphyLoaded) {
 
 			List<Waypoint> waypoints = this.choreography.missions.get(this.currentDroneID).waypoints;
 
-			/** Action to do : Set home position */
-			//TODO: Doit etre envoye a TOUS les drone en meme temps pour qu on est la meme "erreur GPS"
-			//Verifier en suite qu on a bien tous les drones qui ont leur position de setter
-			//comment faire ? : 
-			// 1) set les position en lat : 0, long :0
-			// 2) envoyer UNE seule fois la commande setHomeToCurrentLocation a tous
-			// 3) recuperer les home position de chacun un par un
-			//		si lat long != 0 et long != 0 (ou 0+10km? on est en pleine mera cet endroit) le drone a bien set sa position
-			//Si tous les drone on t set leur position => Continue
-			//sinon reprendre en 1)
-			// !!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			// !!!! Ci dessus ne fonctionne pas car la home position est overwrite quand on arm....  !!!!
 			
 			/** next msg a envoyer : Mission Clear */
 			if(!this.isMissionClearDone) {
@@ -218,6 +210,7 @@ public class ChoreographyManager implements PropertyChangeListener{
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
+		super.propertyChange(evt);
 
 		String propertyName = evt.getPropertyName();
 
@@ -253,7 +246,7 @@ public class ChoreographyManager implements PropertyChangeListener{
 			MissionAck missionAck = (MissionAck) evt.getNewValue();
 
 
-			//MissionAck{targetSystem=255, targetComponent=0, type=EnumValue{value=0, entry=MAV_MISSION_ACCEPTED}, missionType=null}
+			//example : MissionAck{targetSystem=255, targetComponent=0, type=EnumValue{value=0, entry=MAV_MISSION_ACCEPTED}, missionType=null}
 			if(missionAck.type().entry() == MavMissionResult.MAV_MISSION_ACCEPTED) {
 
 				if(!missionClearTimer.isFinished()) {

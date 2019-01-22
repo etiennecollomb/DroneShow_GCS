@@ -1,9 +1,10 @@
-package com.drone.show.gcs.mavlinkaction;
+package com.drone.show.gcs.actions;
 
 import java.beans.PropertyChangeEvent;
 
 import com.drone.show.gcs.MavLinkToolKit;
 import com.drone.show.gcs.MavlinkCommunicationModel;
+import com.drone.show.generic.Tools;
 
 import io.dronefleet.mavlink.MavlinkConnection;
 import io.dronefleet.mavlink.common.GpsFixType;
@@ -70,26 +71,27 @@ public class PreArmCheck extends MavlinkAction {
 
 
 			if(this.is3DFixNeeded && currentGPSFixType < GPS_FIX_TYPE_3D_FIX ) {
-				//if(GlobalManager.ISDEBUG) Tools.writeLogs(" gpsFixType < " + GPS_FIX_TYPE_3D_FIX + " (" + this.getDroneModel().getGpsFixType().name() + ")");
+				Tools.writeLog("### !!! "+this.getClass().getName() + ": gpsFixType < GPS_FIX_TYPE_3D_FIX (current: " + gpsFixType + ")");
 				isAllOK = false;
 			}
 
 			if(this.isDGPSFixNeeded && currentGPSFixType < GPS_FIX_TYPE_DGPS ) {
-				//if(GlobalManager.ISDEBUG) Tools.writeLogs(" gpsFixType < " + GPS_FIX_TYPE_DGPS + " (" + this.getDroneModel().getGpsFixType().name() + ")");
+				Tools.writeLog("### !!! "+this.getClass().getName() + ": gpsFixType < GPS_FIX_TYPE_DGPS (current: " + gpsFixType + ")");
 				isAllOK = false;
 			}
 
 			if(this.isRTKFloatNeeded && currentGPSFixType < GPS_FIX_TYPE_RTK_FLOAT ) {
-				//if(GlobalManager.ISDEBUG) Tools.writeLogs(" gpsFixType < " + GPS_FIX_TYPE_RTK_FLOAT + " (" + this.getDroneModel().getGpsFixType().name() + ")");
+				Tools.writeLog("### !!! "+this.getClass().getName() + ": gpsFixType < GPS_FIX_TYPE_RTK_FLOAT (current: " + gpsFixType + ")");
 				isAllOK = false;
 			}
 
 			if(this.isRTKFixNeeded && currentGPSFixType < GPS_FIX_TYPE_RTK_FIXED ) {
-				//if(GlobalManager.ISDEBUG) Tools.writeLogs(" gpsFixType < " + GPS_FIX_TYPE_RTK_FIXED + " (" + this.getDroneModel().getGpsFixType().name() + ")");
+				Tools.writeLog("### !!! "+this.getClass().getName() + ": gpsFixType < GPS_FIX_TYPE_RTK_FIXED (current: " + gpsFixType + ")");
 				isAllOK = false;
 			}
 
-			this.isFinished = isAllOK;
+
+			this.setFinished(isAllOK);
 			
 		}
 		

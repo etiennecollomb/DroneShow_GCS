@@ -1,4 +1,4 @@
-package com.drone.show.gcs.mavlinkaction;
+package com.drone.show.gcs.actions;
 
 import java.beans.PropertyChangeEvent;
 
@@ -10,14 +10,14 @@ import io.dronefleet.mavlink.MavlinkConnection;
 
 
 
-public class SetStabilizeMode extends MavlinkAction {
+public class SetGuidedMode extends MavlinkAction {
 
 	
 	
-	public SetStabilizeMode(MavlinkConnection connection) {
+	public SetGuidedMode(MavlinkConnection connection) {
 		super(connection);
 		
-		this.mavlinkMessage = MavLinkToolKit.stabilizeMode();
+		this.mavlinkMessage = MavLinkToolKit.guidedMode();
 	}
 
 
@@ -28,8 +28,8 @@ public class SetStabilizeMode extends MavlinkAction {
 
 		if (propertyName.equals(MavlinkCommunicationModel.MODE)){
 
-			if( (Mode)evt.getNewValue() == Mode.STABILIZE) {
-				this.isFinished = true;
+			if( (Mode)evt.getNewValue() == Mode.GUIDED) {
+				this.setFinished(true);
 			}
 			
 		}

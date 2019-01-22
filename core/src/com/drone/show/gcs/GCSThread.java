@@ -7,8 +7,8 @@ import com.badlogic.gdx.maps.Map;
 import com.badlogic.gdx.math.Vector3;
 import com.drone.show.GlobalManager;
 import com.drone.show.gcs.MavlinkCommunicationModel.Mode;
+import com.drone.show.gcs.actions.LoadChoreography;
 import com.drone.show.gcs.scenarii.Choreography;
-import com.drone.show.gcs.scenarii.ChoreographyManager;
 import com.drone.show.gcs.scenarii.FlightManager;
 import com.drone.show.gcs.scenarii.Mission;
 import com.drone.show.gcs.scenarii.Waypoint;
@@ -54,7 +54,7 @@ public class GCSThread implements Runnable {
 
 	
 	//TEST 
-	ChoreographyManager choreographyManager;
+	LoadChoreography choreographyManager;
 	FlightManager flightManager;
 	//END TEST
 
@@ -189,9 +189,10 @@ public class GCSThread implements Runnable {
 		//TODO: a loader a partir d une Map ...
 		float origLatitude = 48.8443781f;
 		float origLongitude = 2.4660531f;
-		choreographyManager = new ChoreographyManager(this.connection, "choreographies/choreoPattern.json", origLatitude, origLongitude);
+		choreographyManager = new LoadChoreography(this.connection, "choreographies/choreoPattern.json", origLatitude, origLongitude);
 		
 		flightManager = new FlightManager(this.connection);
+		flightManager.setTestArming();
 		//FIN TEST
 		
 

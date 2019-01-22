@@ -11,7 +11,7 @@ import com.drone.show.GlobalManager;
 import com.drone.show.MyDroneShow;
 import com.drone.show.gcs.GCSThread;
 import com.drone.show.gcs.MavlinkCommunicationModel;
-import com.drone.show.gcs.scenarii.ChoreographyManager;
+import com.drone.show.gcs.actions.LoadChoreography;
 import com.drone.show.hud.popups.ScenariosPopup;
 import com.drone.show.hud.popups.TelemetryPopup;
 

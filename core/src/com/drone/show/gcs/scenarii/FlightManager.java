@@ -4,99 +4,65 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import com.drone.show.GlobalManager;
-import com.drone.show.gcs.mavlinkaction.Arm;
-import com.drone.show.gcs.mavlinkaction.PreArmCheck;
-import com.drone.show.gcs.mavlinkaction.SetAutoMode;
-import com.drone.show.gcs.mavlinkaction.SetStabilizeMode;
+import com.drone.show.gcs.actions.Arm;
+import com.drone.show.gcs.actions.PreArmCheck;
+import com.drone.show.gcs.actions.SetAutoMode;
+import com.drone.show.gcs.actions.SetLandMode;
+import com.drone.show.gcs.actions.SetStabilizeMode;
+import com.drone.show.gcs.actions.Wait;
+import com.drone.show.generic.Tools;
 
 import io.dronefleet.mavlink.MavlinkConnection;
 
-/** Gere un vol comprennat des missions
- * ie: pre check, arm , launch mission , land...etc
+/** Gere un vol comprenant des missions
+ * ie: pre-check, arm , launch mission , land...etc
  */
 
 public class FlightManager  implements PropertyChangeListener {
 
-	
+
 	MavlinkConnection connection;
-	
-	
-	/** Les Mavlink Action associees */
-	PreArmCheck preArmCheck;
-	SetStabilizeMode setStabilizeMode;
-	SetAutoMode setAutoMode;
-	Arm arm;
-	
-	
-	
-	
+	TimeLine timeLine;
+
+
 	public FlightManager(MavlinkConnection connection) {
-		
-		GlobalManager.realWorldDroneModel.addPropertyChangeListener(this);
-		
+
 		this.connection = connection;
-		
-		this.preArmCheck = new PreArmCheck(this.connection);
-		this.setStabilizeMode = new SetStabilizeMode(this.connection);
-		this.setAutoMode = new SetAutoMode(this.connection);
-		this.arm = new Arm(this.connection);
+		this.timeLine = new TimeLine();
 	}
-	
-	
-	
-	private void testArming() {
-		
-	}
-	
-	
+
+
+
 	public void update() {
-		
-		
-		if(!this.preArmCheck.isFinished) {
-			this.preArmCheck.update();
-		}
-		else if(!this.setStabilizeMode.isFinished) {
-			this.setStabilizeMode.update();
-		}
-		else if(!this.arm.isFinished) {
-			this.arm.update();
+
+		if(!this.timeLine.isFinished) {
+			this.timeLine.update();
 		}
 		else {
 			/** Flight Finished */
-		
+			Tools.writeLog("Flight Finished : OKOKOK  OKOKOK  OKOKOK  OKOKOK  OKOKOK  OKOKOK  OKOKOK  OKOKOK  OKOKOK  OKOKOK  OKOKOK  OKOKOK  OKOKOK  OKOKOK  ");
 		}
-		
-		
-//		myTimeLine.add( new PreArmCheck(connection, droneModel));
-//		myTimeLine.add( new SetHomeToCurrentLocation(connection, droneModel));
-//		myTimeLine.add( new StabilizeMode(connection, droneModel));
-//		myTimeLine.add( new Arm(connection, droneModel));
-//		myTimeLine.add( new GuidedMode(connection, droneModel)); //On ne peut pas armer en Guided Mode, il faut le setter une fois arme
-//
-//		//TakeOff
-//		myTimeLine.add( new TakeOffMove(connection, droneModel, takeOffAlt));
-//		myTimeLine.add( new LoiterMode(connection, droneModel, loiterModeTimer));
-		
-		
-		/** http://python.dronekit.io/guide/auto_mode.html
-		 * If the vehicle is in the air, then changing the mode to AUTO is all that is required to start the mission.
-		 * Copter 3.3 release and later: If the vehicle is on the ground (only), 
-		 * you will additionally need to send the MAV_CMD_MISSION_START command.
-		 * 
-		 * At the end of the mission the vehicle will enter LOITER mode 
-		 */
-		
 	}
-
 
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		
-		
-		
+
 	}
 	
 	
-	
+
+	public void setTestArming() {
+
+		timeLine.reset();
+		
+		timeLine.add( new PreArmCheck(connection));
+		timeLine.add( new SetStabilizeMode(connection));
+		timeLine.add( new Arm(connection));
+		timeLine.add( new Wait(3000f));
+		timeLine.add( new SetLandMode(connection));
+	}
+
+
+
 }

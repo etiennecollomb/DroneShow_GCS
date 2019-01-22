@@ -16,6 +16,7 @@ public class Timer {
 	public boolean isFinished() {
 		if( System.currentTimeMillis() - initTime > duration)
 			return true;
+
 		return false;
 	}
 	

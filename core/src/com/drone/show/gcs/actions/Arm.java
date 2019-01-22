@@ -1,4 +1,4 @@
-package com.drone.show.gcs.mavlinkaction;
+package com.drone.show.gcs.actions;
 
 import java.beans.PropertyChangeEvent;
 
@@ -30,7 +30,7 @@ public class Arm extends MavlinkAction {
 
 			/** Arm is true */
 			if( (boolean)evt.getNewValue() ) {
-				this.isFinished = true;
+				this.setFinished(true);
 			}
 			
 		}

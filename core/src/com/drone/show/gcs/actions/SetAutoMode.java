@@ -1,4 +1,4 @@
-package com.drone.show.gcs.mavlinkaction;
+package com.drone.show.gcs.actions;
 
 import java.beans.PropertyChangeEvent;
 
@@ -10,11 +10,11 @@ import io.dronefleet.mavlink.MavlinkConnection;
 
 
 
-public class SetGuidedMode extends MavlinkAction {
+public class SetAutoMode extends MavlinkAction {
 
 	
 	
-	public SetGuidedMode(MavlinkConnection connection) {
+	public SetAutoMode(MavlinkConnection connection) {
 		super(connection);
 		
 		this.mavlinkMessage = MavLinkToolKit.guidedMode();
@@ -28,8 +28,8 @@ public class SetGuidedMode extends MavlinkAction {
 
 		if (propertyName.equals(MavlinkCommunicationModel.MODE)){
 
-			if( (Mode)evt.getNewValue() == Mode.GUIDED) {
-				this.isFinished = true;
+			if( (Mode)evt.getNewValue() == Mode.AUTO) {
+				this.setFinished(true);
 			}
 			
 		}

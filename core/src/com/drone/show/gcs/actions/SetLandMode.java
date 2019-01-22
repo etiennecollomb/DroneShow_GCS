@@ -1,4 +1,4 @@
-package com.drone.show.gcs.mavlinkaction;
+package com.drone.show.gcs.actions;
 
 import java.beans.PropertyChangeEvent;
 
@@ -10,14 +10,14 @@ import io.dronefleet.mavlink.MavlinkConnection;
 
 
 
-public class SetAutoMode extends MavlinkAction {
+public class SetLandMode extends MavlinkAction {
 
 	
 	
-	public SetAutoMode(MavlinkConnection connection) {
+	public SetLandMode(MavlinkConnection connection) {
 		super(connection);
 		
-		this.mavlinkMessage = MavLinkToolKit.guidedMode();
+		this.mavlinkMessage = MavLinkToolKit.landMode();
 	}
 
 
@@ -26,10 +26,13 @@ public class SetAutoMode extends MavlinkAction {
 		
 		String propertyName = evt.getPropertyName();
 
-		if (propertyName.equals(MavlinkCommunicationModel.MODE)){
+		if (propertyName.equals(MavlinkCommunicationModel.ARM_STATUS)){
 
-			if( (Mode)evt.getNewValue() == Mode.AUTO) {
-				this.isFinished = true;
+			/** If disarmed, land is finished
+			 * Arm is false
+			 **/
+			if( !(boolean)evt.getNewValue() ) {
+				this.setFinished(true);
 			}
 			
 		}
