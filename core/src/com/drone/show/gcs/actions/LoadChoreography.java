@@ -60,9 +60,6 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 	boolean isMissionCountDone;
 	boolean isMissionLoaded; //est ce que le drone courant a load sa mission?
 
-	//Choreography
-	boolean ischoregraphyLoaded; //est ce que le drone courant a load son scenario
-
 
 	/** la choreography a executer */
 	Choreography choreography;
@@ -89,6 +86,7 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 
 
 	public LoadChoreography(MavlinkConnection connection, float origLatitude, float origLongitude){
+		super();
 
 		GlobalManager.realWorldDroneModel.addPropertyChangeListener(this);
 
@@ -100,8 +98,6 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 
 		this.currentDroneID = 0;
 		this.numberOfDrones = 0;
-
-		this.ischoregraphyLoaded = false;
 
 		this.commandTimer = new Timer( (long)(1000.0f/HERTZ) );
 		this.missionClearTimer = new Timer( 2000f ); //2s
@@ -136,7 +132,7 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 	public void update() {
 		super.update();
 
-		if(!this.ischoregraphyLoaded) {
+		if(!this.isFinished()) {
 
 			List<Waypoint> waypoints = this.choreography.missions.get(this.currentDroneID).waypoints;
 
@@ -179,8 +175,8 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 
 				/** a t on fini de tout charger sur tous les drones? */
 				if(currentDroneID > this.numberOfDrones -1) {
-					this.ischoregraphyLoaded = true;
-					Tools.writeLog("     #### END : Choreography loaded. ####     ");
+					this.setFinished(true);
+					Tools.writeLog("     #### Choerography END : Choreography loaded. ####     ");
 				}
 				/** sinon on enchaine sur la mission suivante */
 				else {
@@ -202,7 +198,7 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 		this.isMissionCountDone = false;
 		this.isMissionLoaded = false;
 
-		Tools.writeLog("     #### START : new Mission upload ####     ");
+		Tools.writeLog("     #### Choerography START : new Mission upload ####     ");
 	}
 
 

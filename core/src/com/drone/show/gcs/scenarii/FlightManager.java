@@ -5,6 +5,7 @@ import java.beans.PropertyChangeListener;
 
 import com.drone.show.GlobalManager;
 import com.drone.show.gcs.actions.Arm;
+import com.drone.show.gcs.actions.LoadChoreography;
 import com.drone.show.gcs.actions.PreArmCheck;
 import com.drone.show.gcs.actions.SetAutoMode;
 import com.drone.show.gcs.actions.SetLandMode;
@@ -52,11 +53,19 @@ public class FlightManager  implements PropertyChangeListener {
 	
 	
 
-	public void setTestArming() {
+	public void setTestMissionUploadAndArming() {
 
-		timeLine.reset();
+		/** For testing Mission Upload
+		 * Hong Kong, Appart Matthieu (2001)
+		 */
+		float origLatitude = 22.275667f;
+		float origLongitude = 114.173414f;
+		LoadChoreography loadChoreography = new LoadChoreography(this.connection, "choreographies/choreoPattern10MetersSquare.json", origLatitude, origLongitude);
 		
-		timeLine.add( new PreArmCheck(connection));
+		timeLine.reset();
+
+		timeLine.add( loadChoreography );
+		//timeLine.add( new PreArmCheck(connection));
 		timeLine.add( new SetStabilizeMode(connection));
 		timeLine.add( new Arm(connection));
 		timeLine.add( new Wait(3000f));

@@ -187,12 +187,12 @@ public class GCSThread implements Runnable {
 //		choreographyManager = new ChoreographyManager(this.connection, choreography, 0,0);
 		
 		//TODO: a loader a partir d une Map ...
-		float origLatitude = 48.8443781f;
-		float origLongitude = 2.4660531f;
-		choreographyManager = new LoadChoreography(this.connection, "choreographies/choreoPattern.json", origLatitude, origLongitude);
+//		float origLatitude = 48.8443781f;
+//		float origLongitude = 2.4660531f;
+//		choreographyManager = new LoadChoreography(this.connection, "choreographies/choreoPattern.json", origLatitude, origLongitude);
 		
 		flightManager = new FlightManager(this.connection);
-		flightManager.setTestArming();
+		flightManager.setTestMissionUploadAndArming();
 		//FIN TEST
 		
 
