@@ -65,7 +65,7 @@ public class FlightManager  implements PropertyChangeListener {
 		timeLine.reset();
 
 		timeLine.add( loadChoreography );
-		//timeLine.add( new PreArmCheck(connection));
+		timeLine.add( new PreArmCheck(connection));
 		timeLine.add( new SetStabilizeMode(connection));
 		timeLine.add( new Arm(connection));
 		timeLine.add( new Wait(3000f));
