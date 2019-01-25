@@ -31,7 +31,7 @@ public class GoToPosition extends MavlinkAction {
 		this.setSpeed(speed_);
 		this.setTargetPosition(targetPosition);
 
-		this.setMavlinkMessage( MavLinkToolKit.setPositionTargetLocalNed( targetPosition.x, targetPosition.y, targetPosition.z ) );
+//		this.setMavlinkMessage( MavLinkToolKit.setPositionTargetLocalNed( targetPosition.x, targetPosition.y, targetPosition.z ) );
 		this.setSend_command_timer( System.currentTimeMillis() );
 		this.setSend_command_interval((long)(1000.0f/HERTZ));
 

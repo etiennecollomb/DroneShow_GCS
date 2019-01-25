@@ -14,10 +14,10 @@ public class SetStabilizeMode extends MavlinkAction {
 
 	
 	
-	public SetStabilizeMode(MavlinkConnection connection) {
-		super(connection);
+	public SetStabilizeMode(MavlinkConnection connection, int droneID) {
+		super(connection, droneID);
 		
-		this.mavlinkMessage = MavLinkToolKit.stabilizeMode();
+		this.mavlinkMessage = MavLinkToolKit.stabilizeMode(this.droneID);
 	}
 
 

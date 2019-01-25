@@ -16,7 +16,7 @@ public class GuidedMode extends MavlinkAction {
 	
 	public GuidedMode(MavlinkConnection connection, MavlinkCommunicationModel droneModel) {
 		super(MavlinkActionType.GUIDED_MODE, connection, droneModel);
-		this.setMavlinkMessage( MavLinkToolKit.guidedMode() );
+//		this.setMavlinkMessage( MavLinkToolKit.guidedMode() );
 		this.setSend_command_timer( System.currentTimeMillis() );
 		this.setSend_command_interval((long)(1000.0f/HERTZ));
 	}

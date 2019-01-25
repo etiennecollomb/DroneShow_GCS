@@ -10,6 +10,7 @@ import com.drone.show.generic.Tools;
 
 public abstract class Action implements PropertyChangeListener {
 
+
 	boolean isAlive;
 	private boolean isFinished;
 

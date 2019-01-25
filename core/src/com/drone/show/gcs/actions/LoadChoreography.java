@@ -144,7 +144,7 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 					commandTimer.reset();
 
 					int numberOfWaypoint = waypoints.size();
-					MavLinkToolKit.sendCommand(connection, MavLinkToolKit.missionClearAll());
+					MavLinkToolKit.sendCommand(connection, MavLinkToolKit.missionClearAll(this.currentDroneID));
 				}
 
 			}
@@ -158,7 +158,7 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 						commandTimer.reset();
 
 						int numberOfWaypoint = waypoints.size();
-						MavLinkToolKit.sendCommand(connection, MavLinkToolKit.missionCount(numberOfWaypoint));
+						MavLinkToolKit.sendCommand(connection, MavLinkToolKit.missionCount(this.currentDroneID, numberOfWaypoint));
 					}
 				}
 
@@ -235,7 +235,7 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 			//Conversion local vers lat
 			float wpLatitude = Tools.add_distance_to_Latitude(this.origLatitude, wp.X_in_meter);
 			float wpLongitude = Tools.add_distance_to_Longitude(this.origLongitude, wp.Y_in_meter);
-			MavLinkToolKit.sendCommand(connection, MavLinkToolKit.missionItem(missionRequest.seq(), wpLatitude, wpLongitude, wp.Z_in_meter));//seq, latitude, longitude, altitude));
+			MavLinkToolKit.sendCommand(connection, MavLinkToolKit.missionItem(this.currentDroneID, missionRequest.seq(), wpLatitude, wpLongitude, wp.Z_in_meter));//seq, latitude, longitude, altitude));
 
 		}
 		else if (propertyName.equals(MavlinkCommunicationModel.MISSION_ACK)){

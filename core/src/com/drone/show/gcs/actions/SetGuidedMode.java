@@ -14,10 +14,10 @@ public class SetGuidedMode extends MavlinkAction {
 
 	
 	
-	public SetGuidedMode(MavlinkConnection connection) {
-		super(connection);
+	public SetGuidedMode(MavlinkConnection connection, int droneID) {
+		super(connection, droneID);
 		
-		this.mavlinkMessage = MavLinkToolKit.guidedMode();
+		this.mavlinkMessage = MavLinkToolKit.guidedMode(this.droneID);
 	}
 
 

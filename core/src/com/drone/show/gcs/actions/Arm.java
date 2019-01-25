@@ -14,10 +14,10 @@ public class Arm extends MavlinkAction {
 
 	
 	
-	public Arm(MavlinkConnection connection) {
-		super(connection);
+	public Arm(MavlinkConnection connection, int droneID) {
+		super(connection, droneID);
 		
-		this.mavlinkMessage = MavLinkToolKit.arm();
+		this.mavlinkMessage = MavLinkToolKit.arm(this.droneID);
 	}
 
 

@@ -36,8 +36,8 @@ public class PreArmCheck extends MavlinkAction {
 	private boolean isRTKFixNeeded = false;
 
 	
-	public PreArmCheck(MavlinkConnection connection) {
-		super(connection);
+	public PreArmCheck(MavlinkConnection connection, int droneID) {
+		super(connection, droneID);
 		
 		/** no command specified, on attends que les parametres soient OK */
 		this.streamDataID = MavLinkToolKit.MAVLINK_STREAM_DATA_ID_GpsRawInt;

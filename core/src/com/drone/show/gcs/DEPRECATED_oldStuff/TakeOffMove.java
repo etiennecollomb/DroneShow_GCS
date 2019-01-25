@@ -20,7 +20,7 @@ public class TakeOffMove extends MavlinkAction {
 
 	public TakeOffMove(MavlinkConnection connection, MavlinkCommunicationModel droneModel, float altitude_) {
 		super( MavlinkActionType.TAKEOFF, connection, droneModel);
-		this.setMavlinkMessage( MavLinkToolKit.takeOff(altitude_) );
+//		this.setMavlinkMessage( MavLinkToolKit.takeOff(altitude_) );
 		this.setSend_command_timer( System.currentTimeMillis() );
 		this.setSend_command_interval((long)(1000.0f/HERTZ));
 

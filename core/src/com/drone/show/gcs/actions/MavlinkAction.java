@@ -19,15 +19,18 @@ public abstract class MavlinkAction extends Action implements PropertyChangeList
 	Timer commandTimer;
 
 	MavlinkConnection connection;
+	int droneID;
 	MavlinkMessage mavlinkMessage;
 	int streamDataID; //l'id de la stream data qui envoie les infos lie a l action pour permettre de savoir si l action est finie ou pas
 	boolean isStopAllStreamData, isStreamData; //utiliser pour permettre de recevoir uniquement la stream data associee
 
 
-	public MavlinkAction(MavlinkConnection connection)  {
+	
+	public MavlinkAction(MavlinkConnection connection, int droneID)  {
 		super();
 		
 		this.connection = connection;
+		this.droneID = droneID;
 		this.mavlinkMessage = null;
 		this.streamDataID = -1;
 		this.isStopAllStreamData = false;
@@ -92,14 +95,14 @@ public abstract class MavlinkAction extends Action implements PropertyChangeList
 	private void stopAllStreamData() {
 		if(this.commandTimer.isFinished()) {
 			this.commandTimer.reset();
-			MavLinkToolKit.sendCommand(this.connection, MavLinkToolKit.stopAllStreamData());
+			MavLinkToolKit.sendCommand(this.connection, MavLinkToolKit.stopAllStreamData( MavLinkToolKit.ALL_SYSTEM_ID )); //send to all drone
 		}
 	}
 
 	private void requestStreamData() {
 		if(this.commandTimer.isFinished()) {
 			this.commandTimer.reset();
-			MavLinkToolKit.sendCommand(this.connection, MavLinkToolKit.requestStreamData(this.streamDataID));
+			MavLinkToolKit.sendCommand(this.connection, MavLinkToolKit.requestStreamData(this.droneID, this.streamDataID));
 		}
 	}
 

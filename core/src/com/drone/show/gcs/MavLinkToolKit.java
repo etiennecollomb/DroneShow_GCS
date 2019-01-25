@@ -46,6 +46,9 @@ import io.dronefleet.mavlink.util.reflection.MavlinkReflection;
  *
  */
 public class MavLinkToolKit {
+	
+	public static int ALL_SYSTEM_ID = 0;
+	
 
 	/** https://github.com/ArduPilot/ardupilot/blob/master/ArduCopter/defines.h
 	 * 
@@ -175,14 +178,13 @@ public class MavLinkToolKit {
 	//NOTE : Des messages ne sont pas envoyes si on est en dessou de 8 sattelites captes (LocalPositionNed...etc)
 	//Ce sont des parametres a regler concernant le nombre de sattelites
 	@SuppressWarnings("rawtypes")
-	public static MavlinkMessage requestStreamData(int streamID) {
-
+	public static MavlinkMessage requestStreamData(int droneID, int streamID) {
 
 		return new MavlinkMessage<>(
 				255, // our system id
 				0, // our component id (0 if we're a ground control system)
 				RequestDataStream.builder()
-				.targetSystem(1)
+				.targetSystem(droneID)
 				.targetComponent(1)
 				.reqStreamId(streamID) //ALL DATA
 				.reqMessageRate(5) //Hz
@@ -192,13 +194,13 @@ public class MavLinkToolKit {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public static MavlinkMessage stopAllStreamData() {
+	public static MavlinkMessage stopAllStreamData(int droneID) {
 
 		return new MavlinkMessage<>(
 				255, // our system id
 				0, // our component id (0 if we're a ground control system)
 				RequestDataStream.builder()
-				.targetSystem(1)
+				.targetSystem(droneID)
 				.targetComponent(1)
 				.reqStreamId(0) //ALL DATA
 				.reqMessageRate(5) //Hz
@@ -231,13 +233,13 @@ public class MavLinkToolKit {
 
 
 	@SuppressWarnings("rawtypes")
-	public static MavlinkMessage arm() {
+	public static MavlinkMessage arm(int droneID) {
 
 		return new MavlinkMessage<>(
 				255, // our system id
 				0, // our component id (0 if we're a ground control system)
 				CommandLong.builder()
-				.targetSystem(1)
+				.targetSystem(droneID)
 				.targetComponent(1)
 				.command(MavCmd.MAV_CMD_COMPONENT_ARM_DISARM)
 				.confirmation(0)
@@ -252,13 +254,13 @@ public class MavLinkToolKit {
 	/**
 	 * param7 : Altitude in meter
 	 */
-	public static MavlinkMessage takeOff(float altitude) {
+	public static MavlinkMessage takeOff(int droneID, float altitude) {
 
 		return new MavlinkMessage<>(
 				255, // our system id
 				0, // our component id (0 if we're a ground control system)
 				CommandLong.builder()
-				.targetSystem(1)
+				.targetSystem(droneID)
 				.targetComponent(1)
 				.command(MavCmd.MAV_CMD_NAV_TAKEOFF)
 				.confirmation(0)
@@ -272,13 +274,13 @@ public class MavLinkToolKit {
 	/**
 	 * param2 : Speed m/s
 	 */
-	public static MavlinkMessage changeSpeed(float speed) {
+	public static MavlinkMessage changeSpeed(int droneID, float speed) {
 
 		return new MavlinkMessage<>(
 				255, // our system id
 				0, // our component id (0 if we're a ground control system)
 				CommandLong.builder()
-				.targetSystem(1)
+				.targetSystem(droneID)
 				.targetComponent(1)
 				.command(MavCmd.MAV_CMD_DO_CHANGE_SPEED)
 				.confirmation(0)
@@ -293,13 +295,13 @@ public class MavLinkToolKit {
 	 * param5	Lat	Target latitude. If zero, the Copter will land at the current latitude.
 	 * param6	Lon	Longitude. If zero, the Copter will land at the current Longitude.
 	 */
-	public static MavlinkMessage land() {
+	public static MavlinkMessage land(int droneID) {
 
 		return new MavlinkMessage<>(
 				255, // our system id
 				0, // our component id (0 if we're a ground control system)
 				CommandLong.builder()
-				.targetSystem(1)
+				.targetSystem(droneID)
 				.targetComponent(1)
 				.command(MavCmd.MAV_CMD_NAV_LAND)
 				.confirmation(0)
@@ -312,13 +314,13 @@ public class MavLinkToolKit {
 	/**
 	 * https://discuss.ardupilot.org/t/setting-guided-mode-and-waypoint-by-mavlink/17363/3
 	 */
-	public static MavlinkMessage stabilizeMode() {
+	public static MavlinkMessage stabilizeMode(int droneID) {
 
 		return new MavlinkMessage<>(
 				255, // our system id
 				0, // our component id (0 if we're a ground control system)
-				SetMode.builder() 
-				.targetSystem(1)
+				SetMode.builder()
+				.targetSystem(droneID)
 				.baseMode(MavMode.MAV_MODE_CUSTOM) // @param base_mode The new base mode (Should be 1 to use custom_mode) : Rajout fait dans dronefleet dans MavMode.java
 				.customMode(STABILIZE_CUSTOM_MODE) // 0 = STABILIZE Defined in ArduCopter/defines.h
 				.build());
@@ -328,13 +330,13 @@ public class MavLinkToolKit {
 	/**
 	 * https://discuss.ardupilot.org/t/setting-guided-mode-and-waypoint-by-mavlink/17363/3
 	 */
-	public static MavlinkMessage guidedMode() {
+	public static MavlinkMessage guidedMode(int droneID) {
 
 		return new MavlinkMessage<>(
 				255, // our system id
 				0, // our component id (0 if we're a ground control system)
 				SetMode.builder() 
-				.targetSystem(1)
+				.targetSystem(droneID)
 				.baseMode(MavMode.MAV_MODE_CUSTOM) // @param base_mode The new base mode (Should be 1 to use custom_mode) : Rajout fait dans dronefleet dans MavMode.java
 				.customMode(GUIDED_CUSTOM_MODE) // 4 = GUIDED Defined in ArduCopter/defines.h
 				.build());
@@ -348,13 +350,13 @@ public class MavLinkToolKit {
 	//"I found the reason is that RC 3 set to 1100.
 	//It can be solved in this way, after takeoff in guided mode, send rc 3 1500 to set throttle to 1500, then change mode to loiter, the altitude will be hold."
 	//rc 3 = 1500 -> 50 % Throttle or Hold Current Altitude (depends on flight mode)
-	public static MavlinkMessage loiterMode() {
+	public static MavlinkMessage loiterMode(int droneID) {
 
 		return new MavlinkMessage<>(
 				255, // our system id
 				0, // our component id (0 if we're a ground control system)
 				SetMode.builder() 
-				.targetSystem(1)
+				.targetSystem(droneID)
 				.baseMode(MavMode.MAV_MODE_CUSTOM) // @param base_mode The new base mode (Should be 1 to use custom_mode) : Rajout fait dans dronefleet dans MavMode.java
 				.customMode(LOITER_CUSTOM_MODE) // 5 = LOITER  Defined in ArduCopter/defines.h
 				.build());
@@ -364,13 +366,13 @@ public class MavLinkToolKit {
 	/**
 	 * https://discuss.ardupilot.org/t/setting-guided-mode-and-waypoint-by-mavlink/17363/3
 	 */
-	public static MavlinkMessage landMode() {
+	public static MavlinkMessage landMode(int droneID) {
 
 		return new MavlinkMessage<>(
 				255, // our system id
 				0, // our component id (0 if we're a ground control system)
 				SetMode.builder() 
-				.targetSystem(1)
+				.targetSystem(droneID)
 				.baseMode(MavMode.MAV_MODE_CUSTOM) // @param base_mode The new base mode (Should be 1 to use custom_mode) : Rajout fait dans dronefleet dans MavMode.java
 				.customMode(LAND_CUSTOM_MODE) // 9 = GUIDED Defined in ArduCopter/defines.h
 				.build());
@@ -382,13 +384,13 @@ public class MavLinkToolKit {
 	 * example : takeoff 30m , puis setPositionTargetLocalNed(0,0,20) -> le drone descend de 10m
 	 */
 	@SuppressWarnings("rawtypes")
-	public static MavlinkMessage setPositionTargetLocalNed(float x_, float y_, float z_) {
+	public static MavlinkMessage setPositionTargetLocalNed(int droneID, float x_, float y_, float z_) {
 
 		return new MavlinkMessage<>(
 				255, // our system id
 				0, // our component id (0 if we're a ground control system)
 				SetPositionTargetLocalNed.builder()
-				.targetSystem(1)
+				.targetSystem(droneID)
 				.targetComponent(1)
 				.coordinateFrame(MavFrame.MAV_FRAME_LOCAL_NED)
 				.typeMask(4088) // 4088 = 0b0000111111111000, # type_mask (only positions enabled)
@@ -406,13 +408,13 @@ public class MavLinkToolKit {
 	 * example : takeoff 30m , puis setVelocityTargetLocalNed(0,0,2) -> le drone monte a la vitesse de 2m/s
 	 */
 	@SuppressWarnings("rawtypes")
-	public static MavlinkMessage setVelocityTargetLocalNed(float vx_, float vy_, float vz_) {
+	public static MavlinkMessage setVelocityTargetLocalNed(int droneID, float vx_, float vy_, float vz_) {
 
 		return new MavlinkMessage<>(
 				255, // our system id
 				0, // our component id (0 if we're a ground control system)
 				SetPositionTargetLocalNed.builder()
-				.targetSystem(1)
+				.targetSystem(droneID)
 				.targetComponent(1)
 				.coordinateFrame(MavFrame.MAV_FRAME_LOCAL_NED)
 				.typeMask(4039) // 4039 = 0b0000111111000111, # type_mask (only velocities enabled)
@@ -436,16 +438,16 @@ public class MavLinkToolKit {
 	 * param7	Alt	Target home altitude (if ``param1=2``)
 	 */
 	// Must be in GUIDED MODE (so after Arming....)
-	// Copter Mission use MAV_CMD_DO_SET_HOME command to set the “home position” in the global coordinate frame (MAV_FRAME_GLOBAL)
+	// Copter Mission use MAV_CMD_DO_SET_HOME command to set the ï¿½home positionï¿½ in the global coordinate frame (MAV_FRAME_GLOBAL)
 	// WGS84 coordinate system, where altitude is relative to mean sea level.
 	@SuppressWarnings("rawtypes")
-	public static MavlinkMessage setHomeToCurrentLocation() {
+	public static MavlinkMessage setHomeToCurrentLocation(int droneID) {
 
 		return new MavlinkMessage<>(
 				255, // our system id
 				0, // our component id (0 if we're a ground control system)
 				CommandLong.builder()
-				.targetSystem(1)
+				.targetSystem(droneID)
 				.targetComponent(1)
 				.command(MavCmd.MAV_CMD_DO_SET_HOME)
 				.confirmation(0)
@@ -462,13 +464,13 @@ public class MavLinkToolKit {
 	 * Request the message HOME_POSITION from ardupilot to get home position
 	 */
 	@SuppressWarnings("rawtypes")
-	public static MavlinkMessage requestHomePosition() {
+	public static MavlinkMessage requestHomePosition(int droneID) {
 
 		return new MavlinkMessage<>(
 				255, // our system id
 				0, // our component id (0 if we're a ground control system)
 				CommandLong.builder()
-				.targetSystem(1)
+				.targetSystem(droneID)
 				.targetComponent(1)
 				.command(MavCmd.MAV_CMD_GET_HOME_POSITION)
 				.confirmation(0)
@@ -482,13 +484,13 @@ public class MavLinkToolKit {
 	 * SET CHx_OPT = 0 for nothing
 	 */
 	@SuppressWarnings("rawtypes")
-	public static MavlinkMessage setCHx_OPT(int rcNumber, int optionID) {
+	public static MavlinkMessage setCHx_OPT(int droneID, int rcNumber, int optionID) {
 
 		return new MavlinkMessage<>(
 				255, // our system id
 				0, // our component id (0 if we're a ground control system)
 				ParamSet.builder()
-				.targetSystem(1)
+				.targetSystem(droneID)
 				.targetComponent(1)
 				.paramId("CH"+rcNumber+"_OPT")
 				.paramValue(optionID)
@@ -503,13 +505,13 @@ public class MavLinkToolKit {
 	 * SERVOX_FUNCTION = 1 for passthru
 	 */
 	@SuppressWarnings("rawtypes")
-	public static MavlinkMessage setSERVOx_FUNCTION(int rcNumber, int functionID) {
+	public static MavlinkMessage setSERVOx_FUNCTION(int droneID, int rcNumber, int functionID) {
 
 		return new MavlinkMessage<>(
 				255, // our system id
 				0, // our component id (0 if we're a ground control system)
 				ParamSet.builder()
-				.targetSystem(1)
+				.targetSystem(droneID)
 				.targetComponent(1)
 				.paramId("SERVO"+rcNumber+"_FUNCTION")
 				.paramValue(functionID) //RCPassThru function
@@ -518,13 +520,13 @@ public class MavLinkToolKit {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public static MavlinkMessage setSERVOx_MIN(int servoNumber, int value) {
+	public static MavlinkMessage setSERVOx_MIN(int droneID, int servoNumber, int value) {
 
 		return new MavlinkMessage<>(
 				255, // our system id
 				0, // our component id (0 if we're a ground control system)
 				ParamSet.builder()
-				.targetSystem(1)
+				.targetSystem(droneID)
 				.targetComponent(1)
 				.paramId("SERVO"+servoNumber+"_MIN")
 				.paramValue(value)
@@ -533,13 +535,13 @@ public class MavLinkToolKit {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public static MavlinkMessage setSERVOx_MAX(int servoNumber, int value) {
+	public static MavlinkMessage setSERVOx_MAX(int droneID, int servoNumber, int value) {
 
 		return new MavlinkMessage<>(
 				255, // our system id
 				0, // our component id (0 if we're a ground control system)
 				ParamSet.builder()
-				.targetSystem(1)
+				.targetSystem(droneID)
 				.targetComponent(1)
 				.paramId("SERVO"+servoNumber+"_MAX")
 				.paramValue(value)
@@ -552,49 +554,49 @@ public class MavLinkToolKit {
 	 * Ovveride RC Channel
 	 */
 	@SuppressWarnings("rawtypes")
-	public static MavlinkMessage rc3ChannelOverride(int rcValue) {
+	public static MavlinkMessage rc3ChannelOverride(int droneID, int rcValue) {
 
 		return new MavlinkMessage<>(
 				255, // our system id
 				0, // our component id (0 if we're a ground control system)
 				RcChannelsOverride.builder() 
-				.targetSystem(1)
+				.targetSystem(droneID)
 				.chan3Raw(rcValue)
 				.build());
 	}
 
 	@SuppressWarnings("rawtypes")
-	public static MavlinkMessage rc6ChannelOverride(int rcValue) {
+	public static MavlinkMessage rc6ChannelOverride(int droneID, int rcValue) {
 
 		return new MavlinkMessage<>(
 				255, // our system id
 				0, // our component id (0 if we're a ground control system)
 				RcChannelsOverride.builder() 
-				.targetSystem(1)
+				.targetSystem(droneID)
 				.chan6Raw(rcValue)
 				.build());
 	}
 
 	@SuppressWarnings("rawtypes")
-	public static MavlinkMessage rc7ChannelOverride(int rcValue) {
+	public static MavlinkMessage rc7ChannelOverride(int droneID, int rcValue) {
 
 		return new MavlinkMessage<>(
 				255, // our system id
 				0, // our component id (0 if we're a ground control system)
 				RcChannelsOverride.builder() 
-				.targetSystem(1)
+				.targetSystem(droneID)
 				.chan7Raw(rcValue)
 				.build());
 	}
 
 	@SuppressWarnings("rawtypes")
-	public static MavlinkMessage rc8ChannelOverride(int rcValue) {
+	public static MavlinkMessage rc8ChannelOverride(int droneID, int rcValue) {
 
 		return new MavlinkMessage<>(
 				255, // our system id
 				0, // our component id (0 if we're a ground control system)
 				RcChannelsOverride.builder() 
-				.targetSystem(1)
+				.targetSystem(droneID)
 				.chan8Raw(rcValue)
 				.build());
 	}
@@ -620,13 +622,13 @@ public class MavLinkToolKit {
 	//	}
 	 **/
 	@SuppressWarnings("rawtypes")
-	public static MavlinkMessage setRGB_to_channel(int R, int G, int B) {
+	public static MavlinkMessage setRGB_to_channel(int droneID, int R, int G, int B) {
 
 		return new MavlinkMessage<>(
 				255, // our system id
 				0, // our component id (0 if we're a ground control system)
 				RcChannelsOverride.builder() 
-				.targetSystem(1)
+				.targetSystem(droneID)
 				.chan6Raw(R)
 				.chan7Raw(G)
 				.chan8Raw(B)
@@ -635,13 +637,13 @@ public class MavLinkToolKit {
 
 
 	@SuppressWarnings("rawtypes")
-	public static MavlinkMessage paramRequestList() {
+	public static MavlinkMessage paramRequestList(int droneID) {
 
 		return new MavlinkMessage<>(
 				255, // our system id
 				0, // our component id (0 if we're a ground control system)
 				ParamRequestList.builder()
-				.targetSystem(1)
+				.targetSystem(droneID)
 				.targetComponent(1)
 				.build());
 
@@ -649,30 +651,35 @@ public class MavLinkToolKit {
 
 
 	
-	/**MISSION**/
+	/**
+	 * 
+	 * MISSION
+	 * 
+	 * **/
 	
 	@SuppressWarnings("rawtypes")
-	public static MavlinkMessage missionCount(int count) {
+	public static MavlinkMessage missionCount(int droneID, int count) {
 
 		return new MavlinkMessage<>(
 				255, // our system id
 				0, // our component id (0 if we're a ground control system)
 				MissionCount.builder()
-				.targetSystem(1)
+				.targetSystem(droneID)
 				.targetComponent(1)
 				.count(count)
 				.build());
 
 	}
 
+	
 	@SuppressWarnings("rawtypes")
-	public static MavlinkMessage missionClearAll() {
+	public static MavlinkMessage missionClearAll(int droneID) {
 
 		return new MavlinkMessage<>(
 				255, // our system id
 				0, // our component id (0 if we're a ground control system)
 				MissionClearAll.builder()
-				.targetSystem(1)
+				.targetSystem(droneID)
 				.targetComponent(1)
 				.missionType(MavMissionType.MAV_MISSION_TYPE_ALL)
 				.build());
@@ -680,28 +687,20 @@ public class MavLinkToolKit {
 	}
 	
 	
-	
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////// A TESTER ///////////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
-	
-	/** MISSION_ITEM_INT sends the lat/long of a waypoint as integer numbers
-	 * and avoids the percision issue that occurs when encoding lat/lon in a float.
+	/**
+	 * MISSION_ITEM sends the lat/long of a waypoint as float E-7 numbers
 	 */
-	
 	//https://discuss.ardupilot.org/t/planning-missions-via-mavlink/16489/7
 	//mavlink_msg_mission_item_pack(255, 1, &msg, 1, 0, 0, MAV_FRAME_GLOBAL, MAV_CMD_NAV_TAKEOFF, 0, 0, 0, 0, 0, 0, 0, 0, 25);
 	//mavlink_msg_mission_item_pack(255, 1, &msg, 1, 0, 0, MAV_FRAME_GLOBAL, MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 2, 0, 0, 52.464217, -1.280222, 50);
-	
 	@SuppressWarnings("rawtypes")
-	public static MavlinkMessage missionItem(int sequence, float latitude, float longitude, float altitude) {
+	public static MavlinkMessage missionItem(int droneID, int sequence, float latitude, float longitude, float altitude) {
 
 		return new MavlinkMessage<>(
 				255, // our system id
 				0, // our component id (0 if we're a ground control system)
 				MissionItem.builder()
-				.targetSystem(1)
+				.targetSystem(droneID)
 				.targetComponent(1)
 				.seq(sequence)
 				//All other commands use the MAV_FRAME_GLOBAL_RELATIVE_ALT frame,
@@ -716,6 +715,13 @@ public class MavLinkToolKit {
 				.build());
 
 	}
+	
+	
+	
+	
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////// A TESTER ///////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	
 	
@@ -745,13 +751,13 @@ public class MavLinkToolKit {
 	 * With no delay specified the waypoint will be considered complete when the virtual point that the vehicle is chasing reaches the waypoint.
 	 */
 	@SuppressWarnings("rawtypes")
-	public static MavlinkMessage setWPNAV_RADIUS(int centimeterRadius) {
+	public static MavlinkMessage setWPNAV_RADIUS(int droneID, int centimeterRadius) {
 
 		return new MavlinkMessage<>(
 				255, // our system id
 				0, // our component id (0 if we're a ground control system)
 				ParamSet.builder()
-				.targetSystem(1)
+				.targetSystem(droneID)
 				.targetComponent(1)
 				.paramId("WPNAV_RADIUS")
 				.paramValue(centimeterRadius)
@@ -767,14 +773,14 @@ public class MavLinkToolKit {
 	 * param 7	Altitude
 	 */
 	@SuppressWarnings("rawtypes")
-	public static MavlinkMessage waypoint(float holdTime, float latitude, float longitude, float altitude) {
+	public static MavlinkMessage waypoint(int droneID, float holdTime, float latitude, float longitude, float altitude) {
 
 		return new MavlinkMessage<>(
 				255, // our system id
 				0, // our component id (0 if we're a ground control system)
 
 				CommandLong.builder()
-				.targetSystem(1)
+				.targetSystem(droneID)
 				.targetComponent(1)
 				.command(MavCmd.MAV_CMD_NAV_WAYPOINT)
 				.confirmation(0)
@@ -798,13 +804,13 @@ public class MavLinkToolKit {
 	 * Param 2 :	The interval between two messages, in microseconds. Set to -1 to disable and 0 to request default rate.
 	 * */
 	@SuppressWarnings("rawtypes")
-	public static MavlinkMessage setMessageInterval(int msgID, int interval) {
+	public static MavlinkMessage setMessageInterval(int droneID, int msgID, int interval) {
 
 		return new MavlinkMessage<>(
 				255, // our system id
 				0, // our component id (0 if we're a ground control system)
 				CommandLong.builder()
-				.targetSystem(1)
+				.targetSystem(droneID)
 				.targetComponent(1)
 				.command(MavCmd.MAV_CMD_SET_MESSAGE_INTERVAL)
 				.confirmation(0)
@@ -812,12 +818,7 @@ public class MavLinkToolKit {
 				.param2(interval)
 				.build());
 
-
 	}
-
-
-
-
 
 
 }

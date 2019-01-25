@@ -12,7 +12,7 @@ public class Arm extends MavlinkAction {
 	
 	public Arm(MavlinkConnection connection, MavlinkCommunicationModel droneModel) {
 		super(MavlinkActionType.ARM, connection, droneModel);
-		this.setMavlinkMessage( MavLinkToolKit.arm() );
+//		this.setMavlinkMessage( MavLinkToolKit.arm() );
 		this.setSend_command_interval((long)(1000.0f/HERTZ));
 	}
 

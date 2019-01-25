@@ -18,7 +18,7 @@ public class LoiterMode extends MavlinkAction {
 
 	public LoiterMode(MavlinkConnection connection, MavlinkCommunicationModel droneModel, float duration_in_sec) {
 		super(MavlinkActionType.LOITER_MODE, connection, droneModel);
-		this.setMavlinkMessage( MavLinkToolKit.loiterMode() );
+//		this.setMavlinkMessage( MavLinkToolKit.loiterMode() );
 		this.setSend_command_timer( System.currentTimeMillis() );
 		this.setSend_command_interval((long)(1000.0f/HERTZ));
 
@@ -40,7 +40,7 @@ public class LoiterMode extends MavlinkAction {
 			//"Recent versions of ArduCopter require you to set the channel overrides every seconds (or 3sec?)."
 			//To do LOITER we need to perform ('rc 3 1500')
 			
-			MavLinkToolKit.sendCommand(this.getConnection(), MavLinkToolKit.rc3ChannelOverride(1500));
+//			MavLinkToolKit.sendCommand(this.getConnection(), MavLinkToolKit.rc3ChannelOverride(1500));
 
 			if(this.getMavComModel().getMode() != Mode.LOITER) {
 				MavLinkToolKit.sendCommand(this.getConnection(), this.getMavlinkMessage());

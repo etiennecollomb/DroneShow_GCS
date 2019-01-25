@@ -53,7 +53,7 @@ public class FlightManager  implements PropertyChangeListener {
 	
 	
 
-	public void setTestMissionUploadAndArming() {
+	public void setTestMissionUploadAndArming(int droneID) {
 
 		/** For testing Mission Upload
 		 * Hong Kong, Appart Matthieu (2001)
@@ -65,11 +65,11 @@ public class FlightManager  implements PropertyChangeListener {
 		timeLine.reset();
 
 		timeLine.add( loadChoreography );
-		timeLine.add( new PreArmCheck(connection));
-		timeLine.add( new SetStabilizeMode(connection));
-		timeLine.add( new Arm(connection));
-		timeLine.add( new Wait(3000f));
-		timeLine.add( new SetLandMode(connection));
+		timeLine.add( new PreArmCheck(connection, droneID));
+		timeLine.add( new SetStabilizeMode(connection, droneID));
+		timeLine.add( new Arm(connection, droneID));
+		timeLine.add( new Wait(3000f)); //3 sec
+		timeLine.add( new SetLandMode(connection, droneID));
 	}
 
 

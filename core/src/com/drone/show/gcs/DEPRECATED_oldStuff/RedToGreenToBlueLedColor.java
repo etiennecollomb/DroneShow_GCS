@@ -58,7 +58,7 @@ public class RedToGreenToBlueLedColor extends MavlinkAction {
 		}
 
 		Tools.setColorRedToGreenToBlue(color, 0f, MAX_PWM, currentValue);
-		MavLinkToolKit.sendCommand(this.getConnection(), MavLinkToolKit.setRGB_to_channel((int)(color.r*MAX_PWM), (int)(color.g*MAX_PWM), (int)(color.b*MAX_PWM)));
+//		MavLinkToolKit.sendCommand(this.getConnection(), MavLinkToolKit.setRGB_to_channel((int)(color.r*MAX_PWM), (int)(color.g*MAX_PWM), (int)(color.b*MAX_PWM)));
 
 //		System.out.println(currentValue);
 //		System.out.println((int)(color.r*MAX_PWM)+","+(int)(color.g*MAX_PWM)+","+(int)(color.b*MAX_PWM));

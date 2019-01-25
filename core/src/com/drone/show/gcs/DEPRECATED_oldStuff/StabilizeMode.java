@@ -15,7 +15,7 @@ public class StabilizeMode extends MavlinkAction {
 	
 	public StabilizeMode(MavlinkConnection connection, MavlinkCommunicationModel droneModel) {
 		super(MavlinkActionType.STABILIZE_MODE, connection, droneModel);
-		this.setMavlinkMessage( MavLinkToolKit.stabilizeMode() );
+//		this.setMavlinkMessage( MavLinkToolKit.stabilizeMode() );
 		this.setSend_command_timer( System.currentTimeMillis() );
 		this.setSend_command_interval((long)(1000.0f/HERTZ));
 	}

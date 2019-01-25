@@ -15,7 +15,7 @@ public class LandMode extends MavlinkAction {
 	
 	public LandMode(MavlinkConnection connection, MavlinkCommunicationModel droneModel) {
 		super(MavlinkActionType.LAND_MODE, connection, droneModel);
-		this.setMavlinkMessage( MavLinkToolKit.landMode() );
+//		this.setMavlinkMessage( MavLinkToolKit.landMode() );
 		this.setSend_command_timer( System.currentTimeMillis() );
 		this.setSend_command_interval((long)(1000.0f/HERTZ));
 	}

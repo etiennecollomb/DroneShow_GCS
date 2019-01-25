@@ -177,22 +177,8 @@ public class GCSThread implements Runnable {
 	private void mainLoop() {
 
 		//TEST
-//		Waypoint w1 = new Waypoint(1, 2, 3);
-//		Waypoint w2 = new Waypoint(4, 5, 6);
-//		Mission m1 = new Mission();
-//		m1.add(w1);
-//		m1.add(w2);
-//		Choreography choreography = new Choreography();
-//		choreography.add(m1);
-//		choreographyManager = new ChoreographyManager(this.connection, choreography, 0,0);
-		
-		//TODO: a loader a partir d une Map ...
-//		float origLatitude = 48.8443781f;
-//		float origLongitude = 2.4660531f;
-//		choreographyManager = new LoadChoreography(this.connection, "choreographies/choreoPattern.json", origLatitude, origLongitude);
-		
 		flightManager = new FlightManager(this.connection);
-		flightManager.setTestMissionUploadAndArming();
+		flightManager.setTestMissionUploadAndArming(1);  //tester avec 2..etc
 		//FIN TEST
 		
 

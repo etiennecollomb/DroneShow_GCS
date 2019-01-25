@@ -27,19 +27,19 @@ public class InitLed extends MavlinkAction {
 		if(System.currentTimeMillis() - this.getSend_command_timer() > this.getSend_command_interval()) {
 			this.setSend_command_timer( System.currentTimeMillis() );
 			
-			MavLinkToolKit.sendCommand(this.getConnection(), MavLinkToolKit.setCHx_OPT(6, MavLinkToolKit.DISABLE));
-			MavLinkToolKit.sendCommand(this.getConnection(), MavLinkToolKit.setSERVOx_FUNCTION(6, MavLinkToolKit.RC_PASS_TRU));
-			MavLinkToolKit.sendCommand(this.getConnection(), MavLinkToolKit.setCHx_OPT(7, MavLinkToolKit.DISABLE));
-			MavLinkToolKit.sendCommand(this.getConnection(), MavLinkToolKit.setSERVOx_FUNCTION(7, MavLinkToolKit.RC_PASS_TRU));
-			MavLinkToolKit.sendCommand(this.getConnection(), MavLinkToolKit.setCHx_OPT(8, MavLinkToolKit.DISABLE));
-			MavLinkToolKit.sendCommand(this.getConnection(), MavLinkToolKit.setSERVOx_FUNCTION(8, MavLinkToolKit.RC_PASS_TRU));
-			
-			MavLinkToolKit.sendCommand(this.getConnection(), MavLinkToolKit.setSERVOx_MIN(6, SERVO_MIN));
-			MavLinkToolKit.sendCommand(this.getConnection(), MavLinkToolKit.setSERVOx_MAX(6, SERVO_MAX));
-			MavLinkToolKit.sendCommand(this.getConnection(), MavLinkToolKit.setSERVOx_MIN(7, SERVO_MIN));
-			MavLinkToolKit.sendCommand(this.getConnection(), MavLinkToolKit.setSERVOx_MAX(7, SERVO_MAX));
-			MavLinkToolKit.sendCommand(this.getConnection(), MavLinkToolKit.setSERVOx_MIN(8, SERVO_MIN));
-			MavLinkToolKit.sendCommand(this.getConnection(), MavLinkToolKit.setSERVOx_MAX(8, SERVO_MAX));
+//			MavLinkToolKit.sendCommand(this.getConnection(), MavLinkToolKit.setCHx_OPT(6, MavLinkToolKit.DISABLE));
+//			MavLinkToolKit.sendCommand(this.getConnection(), MavLinkToolKit.setSERVOx_FUNCTION(6, MavLinkToolKit.RC_PASS_TRU));
+//			MavLinkToolKit.sendCommand(this.getConnection(), MavLinkToolKit.setCHx_OPT(7, MavLinkToolKit.DISABLE));
+//			MavLinkToolKit.sendCommand(this.getConnection(), MavLinkToolKit.setSERVOx_FUNCTION(7, MavLinkToolKit.RC_PASS_TRU));
+//			MavLinkToolKit.sendCommand(this.getConnection(), MavLinkToolKit.setCHx_OPT(8, MavLinkToolKit.DISABLE));
+//			MavLinkToolKit.sendCommand(this.getConnection(), MavLinkToolKit.setSERVOx_FUNCTION(8, MavLinkToolKit.RC_PASS_TRU));
+//			
+//			MavLinkToolKit.sendCommand(this.getConnection(), MavLinkToolKit.setSERVOx_MIN(6, SERVO_MIN));
+//			MavLinkToolKit.sendCommand(this.getConnection(), MavLinkToolKit.setSERVOx_MAX(6, SERVO_MAX));
+//			MavLinkToolKit.sendCommand(this.getConnection(), MavLinkToolKit.setSERVOx_MIN(7, SERVO_MIN));
+//			MavLinkToolKit.sendCommand(this.getConnection(), MavLinkToolKit.setSERVOx_MAX(7, SERVO_MAX));
+//			MavLinkToolKit.sendCommand(this.getConnection(), MavLinkToolKit.setSERVOx_MIN(8, SERVO_MIN));
+//			MavLinkToolKit.sendCommand(this.getConnection(), MavLinkToolKit.setSERVOx_MAX(8, SERVO_MAX));
 		}
 		
 		//TODO : mettre un propoerty change listener sur un objet led, qui udate les valueures a chaque fois qu on recoit le bon param value

@@ -19,7 +19,7 @@ public class RequestStreamData extends MavlinkAction {
 
 		this.streamDataID = streamDataID_;
 		
-		this.setMavlinkMessage( MavLinkToolKit.requestStreamData(this.streamDataID) );
+//		this.setMavlinkMessage( MavLinkToolKit.requestStreamData(this.streamDataID) );
 		this.setSend_command_interval((long)(1000.0f/HERTZ));
 
 	}

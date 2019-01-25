@@ -14,7 +14,7 @@ public class SetHomeToCurrentLocation extends MavlinkAction {
 
 	public SetHomeToCurrentLocation(MavlinkConnection connection, MavlinkCommunicationModel droneModel) {
 		super(MavlinkActionType.SET_HOME_TO_CURRENT_LOCATION, connection, droneModel);
-		this.setMavlinkMessage( MavLinkToolKit.setHomeToCurrentLocation() );
+//		this.setMavlinkMessage( MavLinkToolKit.setHomeToCurrentLocation() );
 		this.setSend_command_interval((long)(1000.0f/HERTZ));
 	}
 

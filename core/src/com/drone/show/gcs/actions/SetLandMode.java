@@ -14,10 +14,10 @@ public class SetLandMode extends MavlinkAction {
 
 	
 	
-	public SetLandMode(MavlinkConnection connection) {
-		super(connection);
+	public SetLandMode(MavlinkConnection connection, int droneID) {
+		super(connection, droneID);
 		
-		this.mavlinkMessage = MavLinkToolKit.landMode();
+		this.mavlinkMessage = MavLinkToolKit.landMode(this.droneID);
 	}
 
 
