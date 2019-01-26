@@ -178,7 +178,8 @@ public class GCSThread implements Runnable {
 
 		//TEST
 		flightManager = new FlightManager(this.connection);
-		flightManager.setTestMissionUploadAndArming(1);  //tester avec 2..etc
+		//flightManager.setTestMissionUploadAndArming(1);  //tester avec 2..etc
+		flightManager.setTestMissionUploadAndLaunch(1);
 		//FIN TEST
 		
 

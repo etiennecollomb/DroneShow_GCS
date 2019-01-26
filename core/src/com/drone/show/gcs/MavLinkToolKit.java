@@ -47,6 +47,9 @@ import io.dronefleet.mavlink.util.reflection.MavlinkReflection;
  */
 public class MavLinkToolKit {
 	
+	/** A value of 0 for the target_system or target_component is considered a broadcast ID,
+	 * and will be sent to all systems in the network/components on the target system.
+	 */
 	public static int ALL_SYSTEM_ID = 0;
 	
 
@@ -339,6 +342,19 @@ public class MavLinkToolKit {
 				.targetSystem(droneID)
 				.baseMode(MavMode.MAV_MODE_CUSTOM) // @param base_mode The new base mode (Should be 1 to use custom_mode) : Rajout fait dans dronefleet dans MavMode.java
 				.customMode(GUIDED_CUSTOM_MODE) // 4 = GUIDED Defined in ArduCopter/defines.h
+				.build());
+	}
+
+	
+	public static MavlinkMessage autoMode(int droneID) {
+
+		return new MavlinkMessage<>(
+				255, // our system id
+				0, // our component id (0 if we're a ground control system)
+				SetMode.builder() 
+				.targetSystem(droneID)
+				.baseMode(MavMode.MAV_MODE_CUSTOM) // @param base_mode The new base mode (Should be 1 to use custom_mode) : Rajout fait dans dronefleet dans MavMode.java
+				.customMode(AUTO_CUSTOM_MODE) // 3 = AUTO Defined in ArduCopter/defines.h
 				.build());
 	}
 
@@ -687,12 +703,45 @@ public class MavLinkToolKit {
 	}
 	
 	
+	
 	/**
-	 * MISSION_ITEM sends the lat/long of a waypoint as float E-7 numbers
+	 * WAYPOINT - MISSION_ITEM sends the lat/long of a waypoint as float E-7 numbers
 	 */
 	//https://discuss.ardupilot.org/t/planning-missions-via-mavlink/16489/7
 	//mavlink_msg_mission_item_pack(255, 1, &msg, 1, 0, 0, MAV_FRAME_GLOBAL, MAV_CMD_NAV_TAKEOFF, 0, 0, 0, 0, 0, 0, 0, 0, 25);
 	//mavlink_msg_mission_item_pack(255, 1, &msg, 1, 0, 0, MAV_FRAME_GLOBAL, MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 2, 0, 0, 52.464217, -1.280222, 50);
+	//Mission Add : MAV_CMD_NAV_TAKEOFF command. This is ignored if the vehicle is already in the air.
+	@SuppressWarnings("rawtypes")
+	public static MavlinkMessage missionTakeOff(int droneID, int sequence, float altitude) {
+
+		return new MavlinkMessage<>(
+				255, // our system id
+				0, // our component id (0 if we're a ground control system)
+				MissionItem.builder()
+				.targetSystem(droneID)
+				.targetComponent(1)
+				.seq(sequence)
+				//All other commands use the MAV_FRAME_GLOBAL_RELATIVE_ALT frame,
+				//which uses the same latitude and longitude,
+				//but sets altitude as relative to the home position (home altitude = 0).
+				.frame(MavFrame.MAV_FRAME_GLOBAL_RELATIVE_ALT)
+				//.frame(MavFrame.MAV_FRAME_LOCAL_NED) //A tester : est ce supporte?
+				.command(MavCmd.MAV_CMD_NAV_TAKEOFF)
+				.x(0) //lattitude
+				.y(0) //longitude
+				.z(altitude) //altitude
+				.build());
+
+	}
+
+	
+	/**
+	 * WAYPOINT - MISSION_ITEM sends the lat/long of a waypoint as float E-7 numbers
+	 */
+	//https://discuss.ardupilot.org/t/planning-missions-via-mavlink/16489/7
+	//mavlink_msg_mission_item_pack(255, 1, &msg, 1, 0, 0, MAV_FRAME_GLOBAL, MAV_CMD_NAV_TAKEOFF, 0, 0, 0, 0, 0, 0, 0, 0, 25);
+	//mavlink_msg_mission_item_pack(255, 1, &msg, 1, 0, 0, MAV_FRAME_GLOBAL, MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 2, 0, 0, 52.464217, -1.280222, 50);
+	//Mission Add : MAV_CMD_NAV_TAKEOFF command. This is ignored if the vehicle is already in the air.
 	@SuppressWarnings("rawtypes")
 	public static MavlinkMessage missionItem(int droneID, int sequence, float latitude, float longitude, float altitude) {
 
@@ -716,7 +765,26 @@ public class MavLinkToolKit {
 
 	}
 	
-	
+
+	/** Start a Mission
+	 * Drone must be in AUTO Mode before 
+	 * No parameters
+	 * http://ardupilot.org/copter/docs/common-mavlink-mission-command-messages-mav_cmd.html#mav-cmd-mission-start
+	 */
+	@SuppressWarnings("rawtypes")
+	public static MavlinkMessage missionStart(int droneID) {
+
+		return new MavlinkMessage<>(
+				255, // our system id
+				0, // our component id (0 if we're a ground control system)
+				CommandLong.builder()
+				.targetSystem(droneID)
+				.targetComponent(1)
+				.command(MavCmd.MAV_CMD_MISSION_START)
+				.confirmation(0)
+				.build());
+
+	}
 	
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -726,7 +794,10 @@ public class MavLinkToolKit {
 	
 	
 
-
+	
+	
+	
+		
 
 
 	

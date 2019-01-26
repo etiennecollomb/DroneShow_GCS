@@ -17,7 +17,7 @@ public class SetAutoMode extends MavlinkAction {
 	public SetAutoMode(MavlinkConnection connection, int droneID) {
 		super(connection, droneID);
 		
-		this.mavlinkMessage = MavLinkToolKit.guidedMode(this.droneID);
+		this.mavlinkMessage = MavLinkToolKit.autoMode(this.droneID);
 	}
 
 

@@ -35,7 +35,7 @@ import io.dronefleet.mavlink.common.ParamValue;
 
 public class LoadChoreography extends Action implements PropertyChangeListener{
 
-	
+
 	private MavlinkConnection connection;
 
 	private static final float HERTZ = 5.0f; //frequence d'envoie de la commande
@@ -56,6 +56,7 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 	int numberOfDrones;
 
 	//Drone by Drone
+	StopAllStreamData stopAllStreamData;
 	boolean isMissionClearDone;
 	boolean isMissionCountDone;
 	boolean isMissionLoaded; //est ce que le drone courant a load sa mission?
@@ -93,10 +94,10 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 		this.connection = connection;
 		this.origLatitude = origLatitude;
 		this.origLongitude = origLongitude;
-		
+
 		this.choreography = null;
 
-		this.currentDroneID = 0;
+		this.currentDroneID = 1; //Demarrer sur le premier drone, puis on itere
 		this.numberOfDrones = 0;
 
 		this.commandTimer = new Timer( (long)(1000.0f/HERTZ) );
@@ -134,58 +135,65 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 
 		if(!this.isFinished()) {
 
-			List<Waypoint> waypoints = this.choreography.missions.get(this.currentDroneID).waypoints;
-
-			
-			/** next msg a envoyer : Mission Clear */
-			if(!this.isMissionClearDone) {
-
-				if(commandTimer.isFinished()) {
-					commandTimer.reset();
-
-					int numberOfWaypoint = waypoints.size();
-					MavLinkToolKit.sendCommand(connection, MavLinkToolKit.missionClearAll(this.currentDroneID));
-				}
-
+			/** Stop all stream first */ 
+			if(!this.stopAllStreamData.isFinished()) {
+				this.stopAllStreamData.update();
 			}
-			/** next msg a envoyer : Mission Count */
-			else if(!this.isMissionCountDone) {
+			else {
 
-				//on a bien fini la pause avec la commande precedente?
-				if(missionClearTimer.isFinished()) {
+				int currentMissionID = this.currentDroneID -1;
+				List<Waypoint> waypoints = this.choreography.missions.get(currentMissionID).waypoints;
+
+				/** next msg a envoyer : Mission Clear */
+				if(!this.isMissionClearDone) {
 
 					if(commandTimer.isFinished()) {
 						commandTimer.reset();
 
-						int numberOfWaypoint = waypoints.size();
-						MavLinkToolKit.sendCommand(connection, MavLinkToolKit.missionCount(this.currentDroneID, numberOfWaypoint));
+						MavLinkToolKit.sendCommand(connection, MavLinkToolKit.missionClearAll(this.currentDroneID));
 					}
+
+				}
+				/** next msg a envoyer : Mission Count */
+				else if(!this.isMissionCountDone) {
+
+					//on a bien fini la pause avec la commande precedente?
+					if(missionClearTimer.isFinished()) {
+
+						if(commandTimer.isFinished()) {
+							commandTimer.reset();
+
+							int numberOfWaypoint = waypoints.size();
+							//on rajoute 1 waypoint , car le premier est la Home Position
+							//Toujours overrided par ardupilot quand le drone Arm
+							numberOfWaypoint = numberOfWaypoint + 1;
+							MavLinkToolKit.sendCommand(connection, MavLinkToolKit.missionCount(this.currentDroneID, numberOfWaypoint));
+						}
+					}
+
+				}
+
+				/** les msgs suivants : les waypoints, sont traites par notification des PropertiesChangeListener*/
+
+
+				/** a t on fini de charger un scenario sur un drone */
+				if(this.isMissionLoaded) {
+
+					this.currentDroneID = this.currentDroneID + 1;
+
+					/** a t on fini de tout charger sur tous les drones? */
+					if(currentDroneID > this.numberOfDrones -1) {
+						this.setFinished(true);
+						Tools.writeLog("     #### Choerography END : Choreography loaded. ####     ");
+					}
+					/** sinon on enchaine sur la mission suivante */
+					else {
+						this.prepareNewMission();
+					}
+
 				}
 
 			}
-
-			/** les msgs suivants : les waypoints, sont traites par notification des PropertiesChangeListener*/
-
-
-
-			/** a t on fini de charger un scenario sur un drone */
-			if(this.isMissionLoaded) {
-
-				this.currentDroneID = this.currentDroneID + 1;
-
-				/** a t on fini de tout charger sur tous les drones? */
-				if(currentDroneID > this.numberOfDrones -1) {
-					this.setFinished(true);
-					Tools.writeLog("     #### Choerography END : Choreography loaded. ####     ");
-				}
-				/** sinon on enchaine sur la mission suivante */
-				else {
-					this.prepareNewMission();
-				}
-
-			}
-
-
 
 		}
 
@@ -193,7 +201,8 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 
 
 	public void prepareNewMission() {
-		
+
+		this.stopAllStreamData = new StopAllStreamData(this.connection);
 		this.isMissionClearDone = false;
 		this.isMissionCountDone = false;
 		this.isMissionLoaded = false;
@@ -230,17 +239,37 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 
 			/** Send a Waypoint */
 			isMissionCountDone = true;
-			Waypoint wp = this.choreography.missions.get(currentDroneID).waypoints.get( missionRequest.seq() );
 
-			//Conversion local vers lat
-			float wpLatitude = Tools.add_distance_to_Latitude(this.origLatitude, wp.X_in_meter);
-			float wpLongitude = Tools.add_distance_to_Longitude(this.origLongitude, wp.Y_in_meter);
-			MavLinkToolKit.sendCommand(connection, MavLinkToolKit.missionItem(this.currentDroneID, missionRequest.seq(), wpLatitude, wpLongitude, wp.Z_in_meter));//seq, latitude, longitude, altitude));
+
+
+			//First one : The first mission sequence number (seq==0) is populated with the home position of the vehicle instead of the first mission item.
+			//Will be overrided by the home position
+			if(missionRequest.seq() == 0) {
+				MavLinkToolKit.sendCommand(connection, MavLinkToolKit.missionItem(this.currentDroneID, missionRequest.seq(), 0,0,0));
+			}
+			else {
+
+				//missionRequest.seq() part bien de 0 et non de 1 pour le premier waypoint
+				//mais le premier waypoint est la home position, overrided by ardupilot qd le drone ARM
+				int missionID = this.currentDroneID - 1;
+				int waypointID = missionRequest.seq()-1;
+				Waypoint wp = this.choreography.missions.get( missionID ).waypoints.get( waypointID );
+
+				//Second one : takeoff
+				//Takeoff (either from ground or by hand-launch). It should be the first command of nearly all Plane and Copter missions.
+				if(missionRequest.seq() == 1) {
+					MavLinkToolKit.sendCommand(connection, MavLinkToolKit.missionTakeOff(this.currentDroneID, missionRequest.seq(), wp.Z_in_meter));
+				}
+				else {
+					float wpLatitude = Tools.add_distance_to_Latitude(this.origLatitude, wp.X_in_meter);
+					float wpLongitude = Tools.add_distance_to_Longitude(this.origLongitude, wp.Y_in_meter);
+					MavLinkToolKit.sendCommand(connection, MavLinkToolKit.missionItem(this.currentDroneID, missionRequest.seq(), wpLatitude, wpLongitude, wp.Z_in_meter));//seq, latitude, longitude, altitude));
+				}
+			}
 
 		}
 		else if (propertyName.equals(MavlinkCommunicationModel.MISSION_ACK)){
 			MissionAck missionAck = (MissionAck) evt.getNewValue();
-
 
 			//example : MissionAck{targetSystem=255, targetComponent=0, type=EnumValue{value=0, entry=MAV_MISSION_ACCEPTED}, missionType=null}
 			if(missionAck.type().entry() == MavMissionResult.MAV_MISSION_ACCEPTED) {
