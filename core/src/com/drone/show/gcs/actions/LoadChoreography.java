@@ -38,8 +38,7 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 
 	private MavlinkConnection connection;
 
-	private static final float HERTZ = 5.0f; //frequence d'envoie de la commande
-	private Timer commandTimer;
+	
 	/** Pour etre sur qu on recoit pas des MissionAck de la commande precedent MissionClear
 	 * alors qu on est sur la sequence REQUEST_ITEM qui retourne un MissionAck aussi
 	 */
@@ -57,8 +56,8 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 
 	//Drone by Drone
 	StopAllStreamData stopAllStreamData;
-	boolean isMissionClearDone;
-	boolean isMissionCountDone;
+	MissionClearAll missionClearAll;
+	MissionCount missionCount;
 	boolean isMissionLoaded; //est ce que le drone courant a load sa mission?
 
 
@@ -77,12 +76,16 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 		Choreography choreography = LoadChoreography.getChoreographyFromJson(filename);
 		this.choreography = choreography;
 		this.numberOfDrones = this.choreography.missions.size();
+
+		this.prepareNewMission();
 	}
 
 	public LoadChoreography(MavlinkConnection connection, Choreography choreography, float origLatitude, float origLongitude){
 		this(connection, origLatitude, origLongitude);
 		this.choreography = choreography;
 		this.numberOfDrones = this.choreography.missions.size();
+
+		this.prepareNewMission();
 	}
 
 
@@ -100,10 +103,7 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 		this.currentDroneID = 1; //Demarrer sur le premier drone, puis on itere
 		this.numberOfDrones = 0;
 
-		this.commandTimer = new Timer( (long)(1000.0f/HERTZ) );
 		this.missionClearTimer = new Timer( 2000f ); //2s
-
-		this.prepareNewMission();
 
 	}
 
@@ -141,34 +141,23 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 			}
 			else {
 
-				int currentMissionID = this.currentDroneID -1;
-				List<Waypoint> waypoints = this.choreography.missions.get(currentMissionID).waypoints;
-
 				/** next msg a envoyer : Mission Clear */
-				if(!this.isMissionClearDone) {
-
-					if(commandTimer.isFinished()) {
-						commandTimer.reset();
-
-						MavLinkToolKit.sendCommand(connection, MavLinkToolKit.missionClearAll(this.currentDroneID));
+				if(!this.missionClearAll.isFinished()) {
+					this.missionClearAll.update();
+					
+					/** Si mission clear est fini */
+					if(this.missionClearAll.isFinished()) {
+						Tools.writeLog("     #### Mission is Cleared (DroneId: "+ this.currentDroneID +") ####     ");
+						this.missionClearTimer.reset(); //on initailise le timer pour la prochaine commande
 					}
-
 				}
+				
 				/** next msg a envoyer : Mission Count */
-				else if(!this.isMissionCountDone) {
+				else if(!this.missionCount.isFinished()) {
 
-					//on a bien fini la pause avec la commande precedente?
+					//on a bien fini la pause avec la commande Clear precedente?
 					if(missionClearTimer.isFinished()) {
-
-						if(commandTimer.isFinished()) {
-							commandTimer.reset();
-
-							int numberOfWaypoint = waypoints.size();
-							//on rajoute 1 waypoint , car le premier est la Home Position
-							//Toujours overrided par ardupilot quand le drone Arm
-							numberOfWaypoint = numberOfWaypoint + 1;
-							MavLinkToolKit.sendCommand(connection, MavLinkToolKit.missionCount(this.currentDroneID, numberOfWaypoint));
-						}
+						this.missionCount.update();
 					}
 
 				}
@@ -203,8 +192,17 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 	public void prepareNewMission() {
 
 		this.stopAllStreamData = new StopAllStreamData(this.connection);
-		this.isMissionClearDone = false;
-		this.isMissionCountDone = false;
+		this.missionClearAll = new MissionClearAll(this.connection, this.currentDroneID);
+		
+		/** on rajoute 1 waypoint , car le premier est la Home Position
+		 * Toujours overrided par ardupilot quand le drone Arm
+		 **/
+		int missionID = this.currentDroneID - 1;
+		List<Waypoint> waypoints = this.choreography.missions.get( missionID ).waypoints;
+		int numberOfWaypoint = waypoints.size();
+		numberOfWaypoint = numberOfWaypoint + 1;
+		this.missionCount = new MissionCount(connection, this.currentDroneID, numberOfWaypoint);
+		
 		this.isMissionLoaded = false;
 
 		Tools.writeLog("     #### Choerography START : new Mission upload ####     ");
@@ -219,28 +217,8 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 
 		String propertyName = evt.getPropertyName();
 
-		if (propertyName.equals(MavlinkCommunicationModel.PARAM_VALUE)){
-			ParamValue paramValue = (ParamValue) evt.getNewValue();
-
-			/** Permet de connaitre le nombre de waypoint deja load dans l'ardupilot */
-			if(paramValue.paramId().equals("MIS_TOTAL")) {
-
-				/** Permet de verifier qu on a bien tous les points clear */
-				if(paramValue.paramValue() == 0f) {
-					this.isMissionClearDone = true;
-					Tools.writeLog("     #### Mission is Cleared (DroneId: "+ this.currentDroneID +") ####     ");
-					this.missionClearTimer.reset(); //on initailise le timer pour la prochaine commande
-				}
-			}
-
-		}
-		else if (propertyName.equals(MavlinkCommunicationModel.MISSION_REQUEST)){
+		if (propertyName.equals(MavlinkCommunicationModel.MISSION_REQUEST)){
 			MissionRequest missionRequest = (MissionRequest) evt.getNewValue();
-
-			/** Send a Waypoint */
-			isMissionCountDone = true;
-
-
 
 			//First one : The first mission sequence number (seq==0) is populated with the home position of the vehicle instead of the first mission item.
 			//Will be overrided by the home position
