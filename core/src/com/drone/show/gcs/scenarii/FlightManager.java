@@ -4,6 +4,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import com.drone.show.GlobalManager;
+import com.drone.show.gcs.MavLinkToolKit;
 import com.drone.show.gcs.actions.Arm;
 import com.drone.show.gcs.actions.LoadChoreography;
 import com.drone.show.gcs.actions.PreArmCheck;
@@ -77,7 +78,7 @@ public class FlightManager  implements PropertyChangeListener {
 
 
 
-	public void setTestMissionUploadAndLaunch(int droneID) {
+	public void setTestMissionUploadAndLaunch() {
 	
 		/** For testing Mission Upload
 		 * Hong Kong, Appart Matthieu (2001)
@@ -87,11 +88,16 @@ public class FlightManager  implements PropertyChangeListener {
 		LoadChoreography loadChoreography = new LoadChoreography(this.connection, "choreographies/choreoPattern_1_Drone_002.json", origLatitude, origLongitude);
 		
 		timeLine.reset();
+		
+		//TEST
+//		timeLine.add( new SetStabilizeMode(connection, 2));
+//		timeLine.add( new SetLandMode(connection, 2));
+		//FIN TEST
 
 		/** to load choreagraphy
 		 * fisrt set mode Stabilize
 		 */
-		timeLine.add( new SetStabilizeMode(connection, droneID));
+		timeLine.add( new SetStabilizeMode(connection, MavLinkToolKit.ALL_SYSTEM_ID));
 		timeLine.add( loadChoreography );
 		
 		/** To start a mission,

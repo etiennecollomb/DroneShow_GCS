@@ -8,6 +8,7 @@ import com.drone.show.generic.Tools;
 
 import io.dronefleet.mavlink.MavlinkConnection;
 import io.dronefleet.mavlink.common.GpsFixType;
+import io.dronefleet.mavlink.common.GpsRawInt;
 
 
 
@@ -52,9 +53,10 @@ public class PreArmCheck extends MavlinkAction {
 
 		
 		/** GPS STATUS */
-		if (propertyName.equals(MavlinkCommunicationModel.GPS_FIX_TYPE)){
+		if (propertyName.equals(MavlinkCommunicationModel.GPS_RAW_INT)){
 
-			GpsFixType gpsFixType = (GpsFixType) evt.getNewValue();
+			GpsRawInt gpsRawIntMessage = (GpsRawInt)evt.getNewValue();
+			GpsFixType gpsFixType = gpsRawIntMessage.fixType().entry();
 			
 			boolean isAllOK = true;
 

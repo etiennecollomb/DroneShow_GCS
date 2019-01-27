@@ -16,23 +16,23 @@ import io.dronefleet.mavlink.MavlinkConnection;
  */
 public class Scenario01bis {
 
-	public static Scenario getScenerio(MavlinkConnection connection, MavlinkCommunicationModel droneModel) {
-		
-		TimeLine myTimeLine = new TimeLine();
-		
-		//LED Init
-		myTimeLine.add( new InitLed(connection, droneModel));
-		
-
-		myTimeLine.add( new Wait(connection, droneModel, 3f) );
-		myTimeLine.add( new Wait(connection, droneModel, 3f) );
-		myTimeLine.add( new Wait(connection, droneModel, 3f) );
-		myTimeLine.add( new Wait(connection, droneModel, 3f) );
-
-//		myTimeLine.flush();
-		return new Scenario(myTimeLine);
-
-		
-	}
-	
+//	public static Scenario getScenerio(MavlinkConnection connection, MavlinkCommunicationModel droneModel) {
+//		
+//		TimeLine myTimeLine = new TimeLine();
+//		
+//		//LED Init
+//		myTimeLine.add( new InitLed(connection, droneModel));
+//		
+//
+//		myTimeLine.add( new Wait(connection, droneModel, 3f) );
+//		myTimeLine.add( new Wait(connection, droneModel, 3f) );
+//		myTimeLine.add( new Wait(connection, droneModel, 3f) );
+//		myTimeLine.add( new Wait(connection, droneModel, 3f) );
+//
+////		myTimeLine.flush();
+//		return new Scenario(myTimeLine);
+//
+//		
+//	}
+//	
 }

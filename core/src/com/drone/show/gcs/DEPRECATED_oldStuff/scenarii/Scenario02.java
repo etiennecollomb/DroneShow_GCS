@@ -23,35 +23,35 @@ import io.dronefleet.mavlink.MavlinkConnection;
  */
 public class Scenario02 {
 
-	public static Scenario getScenerio(MavlinkConnection connection, MavlinkCommunicationModel droneModel) {
-
-		float takeOffAlt = 2.0f; //en m
-		float loiterModeTimer = 999999999999999.0f; //en sec
-		
-		TimeLine myTimeLine = new TimeLine();
-		
-		//LED Init
-		myTimeLine.add( new InitLed(connection, droneModel));
-		
-		//Arming
-		myTimeLine.add( new PreArmCheck(connection, droneModel));
-		myTimeLine.add( new SetHomeToCurrentLocation(connection, droneModel));
-		myTimeLine.add( new StabilizeMode(connection, droneModel));
-		myTimeLine.add( new Arm(connection, droneModel));
-		myTimeLine.add( new GuidedMode(connection, droneModel)); //On ne peut pas armer en Guided Mode, il faut le setter une fois arme
-
-		//TakeOff
-		myTimeLine.add( new TakeOffMove(connection, droneModel, takeOffAlt));
-		
-		myTimeLine.add( new LoiterMode(connection, droneModel, loiterModeTimer));
-		myTimeLine.add( new GuidedMode(connection, droneModel));
-
-		myTimeLine.add( new LandMode(connection, droneModel));
-
-//		myTimeLine.flush();
-		return new Scenario(myTimeLine);
-
-		
-	}
+//	public static Scenario getScenerio(MavlinkConnection connection, MavlinkCommunicationModel droneModel) {
+//
+//		float takeOffAlt = 2.0f; //en m
+//		float loiterModeTimer = 999999999999999.0f; //en sec
+//		
+//		TimeLine myTimeLine = new TimeLine();
+//		
+//		//LED Init
+//		myTimeLine.add( new InitLed(connection, droneModel));
+//		
+//		//Arming
+//		myTimeLine.add( new PreArmCheck(connection, droneModel));
+//		myTimeLine.add( new SetHomeToCurrentLocation(connection, droneModel));
+//		myTimeLine.add( new StabilizeMode(connection, droneModel));
+//		myTimeLine.add( new Arm(connection, droneModel));
+//		myTimeLine.add( new GuidedMode(connection, droneModel)); //On ne peut pas armer en Guided Mode, il faut le setter une fois arme
+//
+//		//TakeOff
+//		myTimeLine.add( new TakeOffMove(connection, droneModel, takeOffAlt));
+//		
+//		myTimeLine.add( new LoiterMode(connection, droneModel, loiterModeTimer));
+//		myTimeLine.add( new GuidedMode(connection, droneModel));
+//
+//		myTimeLine.add( new LandMode(connection, droneModel));
+//
+////		myTimeLine.flush();
+//		return new Scenario(myTimeLine);
+//
+//		
+//	}
 	
 }

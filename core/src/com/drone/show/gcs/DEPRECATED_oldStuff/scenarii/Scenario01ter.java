@@ -23,23 +23,23 @@ import io.dronefleet.mavlink.MavlinkConnection;
  */
 public class Scenario01ter {
 
-	public static Scenario getScenerio(MavlinkConnection connection, MavlinkCommunicationModel droneModel) {
-		
-		TimeLine myTimeLine = new TimeLine();
-		
-		//LED Init
-		myTimeLine.add( new InitLed(connection, droneModel));
-		
-		//Arming
-		myTimeLine.add( new PreArmCheck(connection, droneModel));
-		myTimeLine.add( new SetHomeToCurrentLocation(connection, droneModel));
-		myTimeLine.add( new StabilizeMode(connection, droneModel));
-		myTimeLine.add( new Arm(connection, droneModel));
-
-//		myTimeLine.flush();
-		return new Scenario(myTimeLine);
-
-		
-	}
+//	public static Scenario getScenerio(MavlinkConnection connection, MavlinkCommunicationModel droneModel) {
+//		
+//		TimeLine myTimeLine = new TimeLine();
+//		
+//		//LED Init
+//		myTimeLine.add( new InitLed(connection, droneModel));
+//		
+//		//Arming
+//		myTimeLine.add( new PreArmCheck(connection, droneModel));
+//		myTimeLine.add( new SetHomeToCurrentLocation(connection, droneModel));
+//		myTimeLine.add( new StabilizeMode(connection, droneModel));
+//		myTimeLine.add( new Arm(connection, droneModel));
+//
+////		myTimeLine.flush();
+//		return new Scenario(myTimeLine);
+//
+//		
+//	}
 	
 }

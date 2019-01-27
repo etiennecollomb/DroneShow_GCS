@@ -672,6 +672,9 @@ public class MavLinkToolKit {
 	 * MISSION
 	 * 
 	 * **/
+	//The first mission sequence number (seq==0) is populated with the home position of the vehicle instead of the first mission item.
+	//https://mavlink.io/en/services/mission.html
+	
 	
 	@SuppressWarnings("rawtypes")
 	public static MavlinkMessage missionCount(int droneID, int count) {

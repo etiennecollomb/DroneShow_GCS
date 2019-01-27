@@ -9,7 +9,10 @@ import io.dronefleet.mavlink.ardupilotmega.EkfStatusReport;
 import io.dronefleet.mavlink.common.CommandAck;
 import io.dronefleet.mavlink.common.GlobalPositionInt;
 import io.dronefleet.mavlink.common.GpsFixType;
+import io.dronefleet.mavlink.common.GpsRawInt;
+import io.dronefleet.mavlink.common.Heartbeat;
 import io.dronefleet.mavlink.common.HomePosition;
+import io.dronefleet.mavlink.common.LocalPositionNed;
 import io.dronefleet.mavlink.common.MissionAck;
 import io.dronefleet.mavlink.common.MissionRequest;
 import io.dronefleet.mavlink.common.ParamValue;
@@ -24,12 +27,11 @@ public class MavlinkCommunicationModel {
 
 
 	public static final String IS_STREAM_DATA = "IS_STREAM_DATA";
-	public static final String MODE = "MODE";
-	public static final String NUMBER_OF_SATTELITES = "NUMBER_OF_SATTELITES";
-	public static final String GPS_FIX_TYPE = "GPS_FIX_TYPE";
-	public static final String ARM_STATUS = "ARM_STATUS";
+
+	public static final String HEARTBEAT = "HEARTBEAT";
+	public static final String LOCAL_POS_NED = "LOCAL_POS_NED";
+	public static final String GPS_RAW_INT = "GPS_RAW_INT";
 	public static final String STATUS = "STATUS";
-	public static final String POSITION = "POSITION";
 	public static final String EKF_STATUS = "EKF_STATUS";
 	public static final String COMMAND_ACK = "COMMAND_ACK";
 	public static final String MISSION_ACK = "MISSION_ACK";
@@ -38,51 +40,27 @@ public class MavlinkCommunicationModel {
 	public static final String GLOBAL_POSITION_INT = "GLOBAL_POSITION_INT";
 	public static final String HOME_POSITION = "HOME_POSITION";
 
-	
 
 
 	private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
-	public static enum Mode {
-		STABILIZE,
-		GUIDED,
-		LOITER,
-		AUTO
-	}
-
-	
 	//a t on des stream data en cours?
 	//pour tout message autre que heartbeat recu : oui
 	boolean isStreamData; 
 
-	private boolean isArmed;
-	private Mode mode;
-	//The filtered local position (e.g. fused computer vision and accelerometers). Coordinate frame is right-handed, Z-axis up (aeronautical frame, NED / north-east-up convention)
-	private Vector3 localPositionNed = new Vector3(0,0,0); 
-	private int numberOfSatellite = 0;
-	private GpsFixType gpsFixType;
-
-	//Status about PreArm failure...etc
-	private String statusText;
-
-	//EKF status
+	private Heartbeat heartbeat; //mode , arm
+	private LocalPositionNed localPositionNed;
+	private GpsRawInt gpsRawInt; //nb of Sat , Gps fix
+	private String statusText; //Status about PreArm failure...etc
 	private EkfStatusReport ekfStatusReport;
-
-	//Ack
 	private CommandAck commandAck;
 	private MissionAck missionAck;
-	
-	//Param
 	private ParamValue paramValue;
-
-	//Mission msg
 	private MissionRequest missionRequest;
-	
-	//Position
 	private GlobalPositionInt globalPositionInt;
 	private HomePosition homePosition;
-	
-	
+
+
 
 	public MavlinkCommunicationModel(){
 		this.addPropertyChangeListener(GlobalManager.applicationModel);
@@ -92,23 +70,21 @@ public class MavlinkCommunicationModel {
 
 	public synchronized void resetValue() {
 
-		this.isStreamData = false;
-		this.isArmed = false;
-		this.mode = null;
-		this.localPositionNed.set(0,0,0);
-		this.numberOfSatellite = 0;
-		this.gpsFixType = null;
-		this.statusText = null;
-
 		/** 
+		 * Position :
 		 * Absolute = above sea level (ASL)
 		 * Relative = above home altitude - the APM sets a reference altitude when it is turned on
 		 * Terrain = above ground level (AGL) - the ground station references google terrain information
 		 **/
+		this.heartbeat = null;
+		this.localPositionNed = null;
+		this.gpsRawInt = null;
+		this.statusText = null;
 		this.ekfStatusReport = null;
 		this.commandAck = null;
 		this.missionAck = null;
 		this.paramValue = null;
+		this.missionRequest = null;
 		this.globalPositionInt = null;
 		this.homePosition = null;
 	}
@@ -125,59 +101,37 @@ public class MavlinkCommunicationModel {
 		this.isStreamData = isStreamData;
 	}
 	
-	
-	public  boolean isArmed() {
-		return isArmed;
+
+	public Heartbeat getHeartbeat() {
+		return heartbeat;
 	}
 
 
-	public synchronized void setArmed(boolean isArmed) {
-		this.pcs.firePropertyChange(MavlinkCommunicationModel.ARM_STATUS, null, isArmed);
-		this.isArmed = isArmed;
+	public void setHeartbeat(Heartbeat heartbeat) {
+		this.pcs.firePropertyChange(MavlinkCommunicationModel.HEARTBEAT, null, heartbeat);
+		this.heartbeat = heartbeat;
 	}
 
 
-	public Mode getMode() {
-		return mode;
-	}
-
-
-	public synchronized void setMode(Mode mode) {
-		this.pcs.firePropertyChange(MavlinkCommunicationModel.MODE, null, mode);
-		this.mode = mode;
-	}
-
-
-	public Vector3 getLocalPositionNed() {
+	public LocalPositionNed getLocalPositionNed() {
 		return localPositionNed;
 	}
 
 
-	public synchronized void setLocalPositionNed(Vector3 localPositionNed) {
-		this.pcs.firePropertyChange(MavlinkCommunicationModel.POSITION, null, localPositionNed);
+	public void setLocalPositionNed(LocalPositionNed localPositionNed) {
+		this.pcs.firePropertyChange(MavlinkCommunicationModel.LOCAL_POS_NED, null, localPositionNed);
 		this.localPositionNed = localPositionNed;
 	}
 
 
-	public int getNumberOfSatellite() {
-		return numberOfSatellite;
+	public GpsRawInt getGpsRawInt() {
+		return gpsRawInt;
 	}
 
 
-	public synchronized void setNumberOfSatellite(int numberOfSatellite) {
-		this.pcs.firePropertyChange(MavlinkCommunicationModel.NUMBER_OF_SATTELITES, null, numberOfSatellite);
-		this.numberOfSatellite = numberOfSatellite;
-	}
-
-
-	public GpsFixType getGpsFixType() {
-		return gpsFixType;
-	}
-
-
-	public synchronized void setGpsFixType(GpsFixType gpsFixType) {
-		this.pcs.firePropertyChange(MavlinkCommunicationModel.GPS_FIX_TYPE, null, gpsFixType);
-		this.gpsFixType = gpsFixType;
+	public void setGpsRawInt(GpsRawInt gpsRawInt) {
+		this.pcs.firePropertyChange(MavlinkCommunicationModel.GPS_RAW_INT, null, gpsRawInt);
+		this.gpsRawInt = gpsRawInt;
 	}
 
 
@@ -213,7 +167,7 @@ public class MavlinkCommunicationModel {
 		this.commandAck = commandAck;
 	}
 
-	
+
 	public MissionAck getMissionAck() {
 		return missionAck;
 	}

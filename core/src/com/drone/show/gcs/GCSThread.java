@@ -3,15 +3,9 @@ package com.drone.show.gcs;
 import java.io.IOException;
 import java.net.Socket;
 
-import com.badlogic.gdx.maps.Map;
-import com.badlogic.gdx.math.Vector3;
 import com.drone.show.GlobalManager;
-import com.drone.show.gcs.MavlinkCommunicationModel.Mode;
 import com.drone.show.gcs.actions.LoadChoreography;
-import com.drone.show.gcs.scenarii.Choreography;
 import com.drone.show.gcs.scenarii.FlightManager;
-import com.drone.show.gcs.scenarii.Mission;
-import com.drone.show.gcs.scenarii.Waypoint;
 import com.drone.show.generic.Timer;
 import com.drone.show.generic.Tools;
 import com.fazecast.jSerialComm.SerialPort;
@@ -26,7 +20,6 @@ import io.dronefleet.mavlink.common.Heartbeat;
 import io.dronefleet.mavlink.common.HomePosition;
 import io.dronefleet.mavlink.common.LocalPositionNed;
 import io.dronefleet.mavlink.common.MavAutopilot;
-import io.dronefleet.mavlink.common.MavModeFlag;
 import io.dronefleet.mavlink.common.MissionAck;
 import io.dronefleet.mavlink.common.MissionRequest;
 import io.dronefleet.mavlink.common.ParamValue;
@@ -179,7 +172,7 @@ public class GCSThread implements Runnable {
 		//TEST
 		flightManager = new FlightManager(this.connection);
 		//flightManager.setTestMissionUploadAndArming(1);  //tester avec 2..etc
-		flightManager.setTestMissionUploadAndLaunch(1);
+		flightManager.setTestMissionUploadAndLaunch();
 		//FIN TEST
 		
 
@@ -218,46 +211,18 @@ public class GCSThread implements Runnable {
 
 					if (message.getPayload() instanceof Heartbeat) {
 
-						Heartbeat heartbeatMessage = (Heartbeat)message.getPayload();
-
-						//Custom Mode
-						if(heartbeatMessage.customMode() == MavLinkToolKit.STABILIZE_CUSTOM_MODE) {
-							mavComModel.setMode(Mode.STABILIZE);
-						}
-						else if(heartbeatMessage.customMode() == MavLinkToolKit.GUIDED_CUSTOM_MODE) {
-							mavComModel.setMode(Mode.GUIDED);
-						}
-						else if(heartbeatMessage.customMode() == MavLinkToolKit.LOITER_CUSTOM_MODE) {
-							mavComModel.setMode(Mode.LOITER);
-						}
-						else if(heartbeatMessage.customMode() == MavLinkToolKit.AUTO_CUSTOM_MODE) {
-							mavComModel.setMode(Mode.AUTO);
-						}
-
-
-						//Base Mode
-						if(heartbeatMessage.baseMode().flagsEnabled( MavModeFlag.MAV_MODE_FLAG_SAFETY_ARMED )) {
-							mavComModel.setArmed(true);
-						}
-						else {
-							mavComModel.setArmed(false);
-						}
+						Heartbeat heartbeat = (Heartbeat)message.getPayload();
+						this.mavComModel.setHeartbeat(heartbeat);
 
 					}else if (message.getPayload() instanceof LocalPositionNed) {
 
-						LocalPositionNed localPositionNedMessage = (LocalPositionNed)message.getPayload();
-						mavComModel.setLocalPositionNed( new Vector3(localPositionNedMessage.x(), localPositionNedMessage.y(), -localPositionNedMessage.z()) );
+						LocalPositionNed localPositionNed = (LocalPositionNed)message.getPayload();
+						mavComModel.setLocalPositionNed(localPositionNed);
 
 					}else if (message.getPayload() instanceof GpsRawInt) {
 
-						GpsRawInt gpsRawIntMessage = (GpsRawInt)message.getPayload();
-
-						//Number Of Satellite
-						mavComModel.setNumberOfSatellite(gpsRawIntMessage.satellitesVisible());
-
-						//GPS Fix Type
-						mavComModel.setGpsFixType(gpsRawIntMessage.fixType().entry());
-
+						GpsRawInt gpsRawInt = (GpsRawInt)message.getPayload();
+						this.mavComModel.setGpsRawInt(gpsRawInt);
 
 					}else if (message.getPayload() instanceof HomePosition) {
 

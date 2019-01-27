@@ -4,9 +4,10 @@ import java.beans.PropertyChangeEvent;
 
 import com.drone.show.gcs.MavLinkToolKit;
 import com.drone.show.gcs.MavlinkCommunicationModel;
-import com.drone.show.gcs.MavlinkCommunicationModel.Mode;
 
 import io.dronefleet.mavlink.MavlinkConnection;
+import io.dronefleet.mavlink.common.Heartbeat;
+import io.dronefleet.mavlink.common.MavModeFlag;
 
 
 
@@ -26,10 +27,13 @@ public class Arm extends MavlinkAction {
 		
 		String propertyName = evt.getPropertyName();
 
-		if (propertyName.equals(MavlinkCommunicationModel.ARM_STATUS)){
-
+		if (propertyName.equals(MavlinkCommunicationModel.HEARTBEAT)){
+			
+			Heartbeat heartbeat = (Heartbeat)evt.getNewValue();
+			boolean isArmed = ( heartbeat.baseMode().flagsEnabled( MavModeFlag.MAV_MODE_FLAG_SAFETY_ARMED ) );
+			
 			/** Arm is true */
-			if( (boolean)evt.getNewValue() ) {
+			if( isArmed ) {
 				this.setFinished(true);
 			}
 			

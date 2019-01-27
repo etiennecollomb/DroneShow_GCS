@@ -4,9 +4,9 @@ import java.beans.PropertyChangeEvent;
 
 import com.drone.show.gcs.MavLinkToolKit;
 import com.drone.show.gcs.MavlinkCommunicationModel;
-import com.drone.show.gcs.MavlinkCommunicationModel.Mode;
 
 import io.dronefleet.mavlink.MavlinkConnection;
+import io.dronefleet.mavlink.common.Heartbeat;
 
 
 
@@ -26,9 +26,11 @@ public class SetAutoMode extends MavlinkAction {
 		
 		String propertyName = evt.getPropertyName();
 
-		if (propertyName.equals(MavlinkCommunicationModel.MODE)){
+		if (propertyName.equals(MavlinkCommunicationModel.HEARTBEAT)){
 
-			if( (Mode)evt.getNewValue() == Mode.AUTO) {
+			Heartbeat heartbeat = (Heartbeat)evt.getNewValue();
+					
+			if( heartbeat.customMode() == MavLinkToolKit.AUTO_CUSTOM_MODE) {
 				this.setFinished(true);
 			}
 			
