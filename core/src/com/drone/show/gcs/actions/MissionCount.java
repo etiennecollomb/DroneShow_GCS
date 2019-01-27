@@ -3,10 +3,11 @@ package com.drone.show.gcs.actions;
 import java.beans.PropertyChangeEvent;
 
 import com.drone.show.gcs.MavLinkToolKit;
-import com.drone.show.gcs.MavlinkCommunicationModel;
+import com.drone.show.gcs.RealDroneModel;
 import com.drone.show.generic.Tools;
 
 import io.dronefleet.mavlink.MavlinkConnection;
+import io.dronefleet.mavlink.MavlinkMessage;
 import io.dronefleet.mavlink.common.CommandAck;
 import io.dronefleet.mavlink.common.MavResult;
 import io.dronefleet.mavlink.common.MissionRequest;
@@ -28,13 +29,17 @@ public class MissionCount extends MavlinkAction {
 
 		String propertyName = evt.getPropertyName();
 
-		if (propertyName.equals(MavlinkCommunicationModel.MISSION_REQUEST)){
-			MissionRequest missionRequest = (MissionRequest) evt.getNewValue();
+		if (propertyName.equals(RealDroneModel.MISSION_REQUEST)){
+			MavlinkMessage mavlinkMessage = ((MavlinkMessage)evt.getNewValue());
 
-			/** Si on recoit une mission request c'est que le missionCount a ete accepté */
-			this.setFinished(true);
+			if(mavlinkMessage.getOriginSystemId() == this.droneID) {
+				MissionRequest missionRequest = (MissionRequest)mavlinkMessage.getPayload();
+
+				/** Si on recoit une mission request c'est que le missionCount a ete accepté */
+				this.setFinished(true);
+			}
 		}
 	}
-	
+
 }
-	
+

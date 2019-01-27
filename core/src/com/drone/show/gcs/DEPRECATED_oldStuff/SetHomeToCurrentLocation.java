@@ -1,7 +1,7 @@
 package com.drone.show.gcs.DEPRECATED_oldStuff;
 
 import com.drone.show.gcs.MavLinkToolKit;
-import com.drone.show.gcs.MavlinkCommunicationModel;
+import com.drone.show.gcs.RealDroneModel;
 
 import io.dronefleet.mavlink.MavlinkConnection;
 import io.dronefleet.mavlink.common.MavCmd;
@@ -12,7 +12,7 @@ public class SetHomeToCurrentLocation extends MavlinkAction {
 
 	private static final float HERTZ = 2.0f; //frequence d'envoie de la commande
 
-	public SetHomeToCurrentLocation(MavlinkConnection connection, MavlinkCommunicationModel droneModel) {
+	public SetHomeToCurrentLocation(MavlinkConnection connection, RealDroneModel droneModel) {
 		super(MavlinkActionType.SET_HOME_TO_CURRENT_LOCATION, connection, droneModel);
 //		this.setMavlinkMessage( MavLinkToolKit.setHomeToCurrentLocation() );
 		this.setSend_command_interval((long)(1000.0f/HERTZ));

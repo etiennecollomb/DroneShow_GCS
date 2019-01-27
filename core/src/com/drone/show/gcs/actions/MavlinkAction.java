@@ -5,7 +5,8 @@ import java.beans.PropertyChangeListener;
 
 import com.drone.show.GlobalManager;
 import com.drone.show.gcs.MavLinkToolKit;
-import com.drone.show.gcs.MavlinkCommunicationModel;
+import com.drone.show.gcs.RealDroneModel;
+import com.drone.show.gcs.RealWorldModel;
 import com.drone.show.generic.Timer;
 import io.dronefleet.mavlink.MavlinkConnection;
 import io.dronefleet.mavlink.MavlinkMessage;
@@ -19,7 +20,6 @@ public abstract class MavlinkAction extends Action implements PropertyChangeList
 	Timer commandTimer;
 
 	MavlinkConnection connection;
-	int droneID;
 	MavlinkMessage mavlinkMessage;
 	int streamDataID; //l'id de la stream data qui envoie les infos lie a l action pour permettre de savoir si l action est finie ou pas
 	boolean isStopAllStreamData, isStreamData; //utiliser pour permettre de recevoir uniquement la stream data associee
@@ -27,10 +27,9 @@ public abstract class MavlinkAction extends Action implements PropertyChangeList
 
 	
 	public MavlinkAction(MavlinkConnection connection, int droneID)  {
-		super();
+		super(droneID);
 		
 		this.connection = connection;
-		this.droneID = droneID;
 		this.mavlinkMessage = null;
 		this.streamDataID = -1;
 		this.isStopAllStreamData = false;
@@ -72,7 +71,7 @@ public abstract class MavlinkAction extends Action implements PropertyChangeList
 		
 		String propertyName = evt.getPropertyName();
 
-		if (propertyName.equals(MavlinkCommunicationModel.IS_STREAM_DATA)){
+		if (propertyName.equals(RealWorldModel.IS_STREAM_DATA)){
 
 			/** No stream Data */
 			if( !(boolean)evt.getNewValue() ) {

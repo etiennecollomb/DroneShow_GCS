@@ -1,7 +1,7 @@
 package com.drone.show.gcs.DEPRECATED_oldStuff.scenarii;
 
 import com.badlogic.gdx.math.Vector3;
-import com.drone.show.gcs.MavlinkCommunicationModel;
+import com.drone.show.gcs.RealDroneModel;
 import com.drone.show.gcs.DEPRECATED_oldStuff.Arm;
 import com.drone.show.gcs.DEPRECATED_oldStuff.GoToPosition;
 import com.drone.show.gcs.DEPRECATED_oldStuff.GuidedMode;

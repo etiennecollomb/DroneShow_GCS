@@ -1,7 +1,7 @@
 package com.drone.show.gcs.DEPRECATED_oldStuff;
 
 import com.drone.show.gcs.MavLinkToolKit;
-import com.drone.show.gcs.MavlinkCommunicationModel;
+import com.drone.show.gcs.RealDroneModel;
 import io.dronefleet.mavlink.MavlinkConnection;
 
 
@@ -13,7 +13,7 @@ public class RequestStreamData extends MavlinkAction {
 	int streamDataID;
 
 
-	public RequestStreamData(MavlinkConnection connection, MavlinkCommunicationModel droneModel, int streamDataID_) {
+	public RequestStreamData(MavlinkConnection connection, RealDroneModel droneModel, int streamDataID_) {
 
 		super(MavlinkActionType.REQUEST_DATA_STREAM, connection, droneModel);
 

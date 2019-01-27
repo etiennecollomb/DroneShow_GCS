@@ -4,6 +4,9 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import com.drone.show.GlobalManager;
+import com.drone.show.gcs.MavLinkToolKit;
+import com.drone.show.gcs.RealDroneModel;
+import com.drone.show.gcs.RealWorldModel;
 import com.drone.show.generic.Tools;
 
 
@@ -11,12 +14,18 @@ import com.drone.show.generic.Tools;
 public abstract class Action implements PropertyChangeListener {
 
 
+	int droneID; //From 1 to N , 0 = All drones, -1 = No drones ie: action neutre comme WAIT
 	boolean isAlive;
 	private boolean isFinished;
 
 
 	public Action()  {
+		this(-1);
+	}
 
+	public Action(int droneID)  {
+
+		this.droneID = droneID;
 		this.isAlive = false;
 		this.isFinished = false;
 	}
@@ -29,8 +38,9 @@ public abstract class Action implements PropertyChangeListener {
 		 */
 		if(!this.isAlive) {
 			this.isAlive = true;
-			GlobalManager.realWorldDroneModel.addPropertyChangeListener(this);
-			Tools.writeLog("  ***Action*** : Starting => " + this.getClass().getName() );
+
+			this.startListeningEvents();
+			Tools.writeLog("  ***Action*** : Starting (drone ID:" + this.droneID + ") => " + this.getClass().getName() );
 		}
 
 	}
@@ -42,6 +52,27 @@ public abstract class Action implements PropertyChangeListener {
 	}
 
 
+	protected void startListeningEvents() {
+		/** All drone events */
+		GlobalManager.realWorldModel.addPropertyChangeListener(this);
+		
+		/** Particular Drone Events */
+		if(droneID > 0) {
+			RealDroneModel realDroneModel = GlobalManager.realWorldModel.getRealDroneModel( droneID );
+			realDroneModel.addPropertyChangeListener(this);
+		}
+	}
+
+	protected void stopListeningEvents() {
+		/** All drone events */
+		GlobalManager.realWorldModel.removePropertyChangeListener(this);
+		
+		/** Particular Drone Events */
+		if(droneID > 0) {
+			RealDroneModel realDroneModel = GlobalManager.realWorldModel.getRealDroneModel( droneID );
+			realDroneModel.removePropertyChangeListener(this);
+		}
+	}
 
 
 	public boolean isFinished() {
@@ -56,8 +87,9 @@ public abstract class Action implements PropertyChangeListener {
 		 * on se remove du removePropertyChangeListener
 		 * pour ne pas saturer les envoie de message et eviter effet de bords */
 		if(this.isFinished) {
-			GlobalManager.realWorldDroneModel.removePropertyChangeListener(this);
-			Tools.writeLog("  ***Action*** : Finished => " + this.getClass().getName() );
+
+			this.stopListeningEvents();
+			Tools.writeLog("  ***Action*** : Finished (drone ID:" + this.droneID + ") => " + this.getClass().getName() );
 		}
 	}
 

@@ -5,6 +5,8 @@ import java.beans.PropertyChangeSupport;
 
 import com.badlogic.gdx.math.Vector3;
 import com.drone.show.GlobalManager;
+
+import io.dronefleet.mavlink.MavlinkMessage;
 import io.dronefleet.mavlink.ardupilotmega.EkfStatusReport;
 import io.dronefleet.mavlink.common.CommandAck;
 import io.dronefleet.mavlink.common.GlobalPositionInt;
@@ -23,10 +25,8 @@ import io.dronefleet.mavlink.common.ParamValue;
  * Ce model doit etre en fait celui des drones dans le GCS
  */
 
-public class MavlinkCommunicationModel {
+public class RealDroneModel {
 
-
-	public static final String IS_STREAM_DATA = "IS_STREAM_DATA";
 
 	public static final String HEARTBEAT = "HEARTBEAT";
 	public static final String LOCAL_POS_NED = "LOCAL_POS_NED";
@@ -44,25 +44,21 @@ public class MavlinkCommunicationModel {
 
 	private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
-	//a t on des stream data en cours?
-	//pour tout message autre que heartbeat recu : oui
-	boolean isStreamData; 
-
-	private Heartbeat heartbeat; //mode , arm
-	private LocalPositionNed localPositionNed;
-	private GpsRawInt gpsRawInt; //nb of Sat , Gps fix
-	private String statusText; //Status about PreArm failure...etc
-	private EkfStatusReport ekfStatusReport;
-	private CommandAck commandAck;
-	private MissionAck missionAck;
-	private ParamValue paramValue;
-	private MissionRequest missionRequest;
-	private GlobalPositionInt globalPositionInt;
-	private HomePosition homePosition;
+	private MavlinkMessage<?> heartbeat; //mode , arm
+	private MavlinkMessage<?> localPositionNed;
+	private MavlinkMessage<?> gpsRawInt; //nb of Sat , Gps fix
+	private MavlinkMessage<?> statusText; //Status about PreArm failure...etc
+	private MavlinkMessage<?> ekfStatusReport;
+	private MavlinkMessage<?> commandAck;
+	private MavlinkMessage<?> missionAck;
+	private MavlinkMessage<?> paramValue;
+	private MavlinkMessage<?> missionRequest;
+	private MavlinkMessage<?> globalPositionInt;
+	private MavlinkMessage<?> homePosition;
 
 
 
-	public MavlinkCommunicationModel(){
+	public RealDroneModel(){
 		this.addPropertyChangeListener(GlobalManager.applicationModel);
 		this.resetValue();
 	}
@@ -91,133 +87,123 @@ public class MavlinkCommunicationModel {
 
 
 	
-	public boolean isStreamData() {
-		return isStreamData;
-	}
 
-
-	public void setStreamData(boolean isStreamData) {
-		this.pcs.firePropertyChange(MavlinkCommunicationModel.IS_STREAM_DATA, null, isStreamData);
-		this.isStreamData = isStreamData;
-	}
-	
-
-	public Heartbeat getHeartbeat() {
+	public MavlinkMessage<?> getHeartbeat() {
 		return heartbeat;
 	}
 
 
-	public void setHeartbeat(Heartbeat heartbeat) {
-		this.pcs.firePropertyChange(MavlinkCommunicationModel.HEARTBEAT, null, heartbeat);
+	public void setHeartbeat(MavlinkMessage<?> heartbeat) {
+		this.pcs.firePropertyChange(RealDroneModel.HEARTBEAT, null, heartbeat);
 		this.heartbeat = heartbeat;
 	}
 
 
-	public LocalPositionNed getLocalPositionNed() {
+	public MavlinkMessage<?> getLocalPositionNed() {
 		return localPositionNed;
 	}
 
 
-	public void setLocalPositionNed(LocalPositionNed localPositionNed) {
-		this.pcs.firePropertyChange(MavlinkCommunicationModel.LOCAL_POS_NED, null, localPositionNed);
+	public void setLocalPositionNed(MavlinkMessage<?> localPositionNed) {
+		this.pcs.firePropertyChange(RealDroneModel.LOCAL_POS_NED, null, localPositionNed);
 		this.localPositionNed = localPositionNed;
 	}
 
 
-	public GpsRawInt getGpsRawInt() {
+	public MavlinkMessage<?> getGpsRawInt() {
 		return gpsRawInt;
 	}
 
 
-	public void setGpsRawInt(GpsRawInt gpsRawInt) {
-		this.pcs.firePropertyChange(MavlinkCommunicationModel.GPS_RAW_INT, null, gpsRawInt);
+	public void setGpsRawInt(MavlinkMessage<?> gpsRawInt) {
+		this.pcs.firePropertyChange(RealDroneModel.GPS_RAW_INT, null, gpsRawInt);
 		this.gpsRawInt = gpsRawInt;
 	}
 
 
-	public String getStatusText() {
+	public MavlinkMessage<?> getStatusText() {
 		return statusText;
 	}
 
 
-	public synchronized void setStatusText(String statusText) {
-		this.pcs.firePropertyChange(MavlinkCommunicationModel.STATUS, null, statusText);
+	public synchronized void setStatusText(MavlinkMessage<?> statusText) {
+		this.pcs.firePropertyChange(RealDroneModel.STATUS, null, statusText);
 		this.statusText = statusText;
 	}
 
 
-	public EkfStatusReport getEkfStatusReport() {
+	public MavlinkMessage<?> getEkfStatusReport() {
 		return ekfStatusReport;
 	}
 
 
-	public void setEkfStatusReport(EkfStatusReport ekfStatusReport) {
-		this.pcs.firePropertyChange(MavlinkCommunicationModel.EKF_STATUS, null, ekfStatusReport);
+	public void setEkfStatusReport(MavlinkMessage<?> ekfStatusReport) {
+		this.pcs.firePropertyChange(RealDroneModel.EKF_STATUS, null, ekfStatusReport);
 		this.ekfStatusReport = ekfStatusReport;
 	}
 
 
-	public CommandAck getCommandAck() {
+	public MavlinkMessage<?> getCommandAck() {
 		return commandAck;
 	}
 
 
-	public synchronized void setCommandAck(CommandAck commandAck) {
-		this.pcs.firePropertyChange(MavlinkCommunicationModel.COMMAND_ACK, null, commandAck);
+	public synchronized void setCommandAck(MavlinkMessage<?> commandAck) {
+		this.pcs.firePropertyChange(RealDroneModel.COMMAND_ACK, null, commandAck);
 		this.commandAck = commandAck;
 	}
 
 
-	public MissionAck getMissionAck() {
+	public MavlinkMessage<?> getMissionAck() {
 		return missionAck;
 	}
 
 
-	public synchronized void setMissionAck(MissionAck missionAck) {
-		this.pcs.firePropertyChange(MavlinkCommunicationModel.MISSION_ACK, null, missionAck);
+	public synchronized void setMissionAck(MavlinkMessage<?> missionAck) {
+		this.pcs.firePropertyChange(RealDroneModel.MISSION_ACK, null, missionAck);
 		this.missionAck = missionAck;
 	}
 
-	public MissionRequest getMissionRequest() {
+	public MavlinkMessage<?> getMissionRequest() {
 		return missionRequest;
 	}
 
 
-	public synchronized void setMissionRequest(MissionRequest missionRequest) {
-		this.pcs.firePropertyChange(MavlinkCommunicationModel.MISSION_REQUEST, null, missionRequest);
+	public synchronized void setMissionRequest(MavlinkMessage<?> missionRequest) {
+		this.pcs.firePropertyChange(RealDroneModel.MISSION_REQUEST, null, missionRequest);
 		this.missionRequest = missionRequest;
 	}
 
 
-	public ParamValue getParamValue() {
+	public MavlinkMessage<?> getParamValue() {
 		return paramValue;
 	}
 
 
-	public synchronized void setParamValue(ParamValue paramValue) {
-		this.pcs.firePropertyChange(MavlinkCommunicationModel.PARAM_VALUE, null, paramValue);
+	public synchronized void setParamValue(MavlinkMessage<?> paramValue) {
+		this.pcs.firePropertyChange(RealDroneModel.PARAM_VALUE, null, paramValue);
 		this.paramValue = paramValue;
 	}
 
 
-	public GlobalPositionInt getGlobalPositionInt() {
+	public MavlinkMessage<?> getGlobalPositionInt() {
 		return globalPositionInt;
 	}
 
 
-	public void setGlobalPositionInt(GlobalPositionInt globalPositionInt) {
-		this.pcs.firePropertyChange(MavlinkCommunicationModel.GLOBAL_POSITION_INT, null, globalPositionInt);
+	public void setGlobalPositionInt(MavlinkMessage<?> globalPositionInt) {
+		this.pcs.firePropertyChange(RealDroneModel.GLOBAL_POSITION_INT, null, globalPositionInt);
 		this.globalPositionInt = globalPositionInt;
 	}
 
 
-	public HomePosition getHomePosition() {
+	public MavlinkMessage<?> getHomePosition() {
 		return homePosition;
 	}
 
 
-	public void setHomePosition(HomePosition homePosition) {
-		this.pcs.firePropertyChange(MavlinkCommunicationModel.HOME_POSITION, null, homePosition);
+	public void setHomePosition(MavlinkMessage<?> homePosition) {
+		this.pcs.firePropertyChange(RealDroneModel.HOME_POSITION, null, homePosition);
 		this.homePosition = homePosition;
 	}
 

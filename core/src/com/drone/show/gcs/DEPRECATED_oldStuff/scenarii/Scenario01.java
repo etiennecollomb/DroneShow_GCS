@@ -1,6 +1,6 @@
 package com.drone.show.gcs.DEPRECATED_oldStuff.scenarii;
 
-import com.drone.show.gcs.MavlinkCommunicationModel;
+import com.drone.show.gcs.RealDroneModel;
 import com.drone.show.gcs.DEPRECATED_oldStuff.InitLed;
 import com.drone.show.gcs.DEPRECATED_oldStuff.RedToGreenToBlueLedColor;
 import com.drone.show.gcs.DEPRECATED_oldStuff.Scenario;

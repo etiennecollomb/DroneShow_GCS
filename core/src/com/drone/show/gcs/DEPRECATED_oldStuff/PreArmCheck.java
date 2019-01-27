@@ -2,7 +2,7 @@ package com.drone.show.gcs.DEPRECATED_oldStuff;
 
 import com.badlogic.gdx.graphics.Color;
 import com.drone.show.GlobalManager;
-import com.drone.show.gcs.MavlinkCommunicationModel;
+import com.drone.show.gcs.RealDroneModel;
 import com.drone.show.generic.Tools;
 
 import io.dronefleet.mavlink.MavlinkConnection;

@@ -1,17 +1,11 @@
 package com.drone.show;
 
-import java.io.IOException;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 import com.drone.show.gcs.GCSThread;
-import com.drone.show.gcs.scenarii.Choreography;
-import com.drone.show.generic.Tools;
 import com.drone.show.hud.popups.ScenariosPopup;
 import com.drone.show.hud.popups.TelemetryPopup;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class MyDroneShow extends ApplicationAdapter {
 
@@ -27,7 +21,6 @@ public class MyDroneShow extends ApplicationAdapter {
 		
 		GlobalManager.init();
 
-
 		TelemetryPopup telemetryPopup = new TelemetryPopup(10, 400, 1.5f);
 		ScenariosPopup scenarioPopup = new ScenariosPopup(10, 100, 1f);
 
@@ -36,7 +29,7 @@ public class MyDroneShow extends ApplicationAdapter {
 
 		
 		/** Start GCS thread **/
-		new Thread( new GCSThread(GlobalManager.realWorldDroneModel) ).start();
+		new Thread( new GCSThread() ).start();
 		
 		
 

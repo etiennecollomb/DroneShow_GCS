@@ -7,7 +7,7 @@ import java.net.Socket;
 import com.badlogic.gdx.math.Vector3;
 import com.drone.show.GlobalManager;
 import com.drone.show.gcs.MavLinkToolKit;
-import com.drone.show.gcs.MavlinkCommunicationModel;
+import com.drone.show.gcs.RealDroneModel;
 import com.drone.show.gcs.DEPRECATED_oldStuff.scenarii.Scenario01;
 import com.drone.show.gcs.DEPRECATED_oldStuff.scenarii.Scenario01bis;
 import com.drone.show.gcs.DEPRECATED_oldStuff.scenarii.Scenario01ter;

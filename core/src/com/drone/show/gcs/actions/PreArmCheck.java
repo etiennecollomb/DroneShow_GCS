@@ -3,10 +3,11 @@ package com.drone.show.gcs.actions;
 import java.beans.PropertyChangeEvent;
 
 import com.drone.show.gcs.MavLinkToolKit;
-import com.drone.show.gcs.MavlinkCommunicationModel;
+import com.drone.show.gcs.RealDroneModel;
 import com.drone.show.generic.Tools;
 
 import io.dronefleet.mavlink.MavlinkConnection;
+import io.dronefleet.mavlink.MavlinkMessage;
 import io.dronefleet.mavlink.common.GpsFixType;
 import io.dronefleet.mavlink.common.GpsRawInt;
 
@@ -14,7 +15,7 @@ import io.dronefleet.mavlink.common.GpsRawInt;
 
 public class PreArmCheck extends MavlinkAction {
 
-	
+
 	private static final int GPS_FIX_TYPE_NO_GPS = 0;
 	private static final int GPS_FIX_TYPE_NO_FIX = 1;
 	private static final int GPS_FIX_TYPE_2D_FIX = 2;
@@ -36,10 +37,10 @@ public class PreArmCheck extends MavlinkAction {
 	private boolean isRTKFloatNeeded = false;
 	private boolean isRTKFixNeeded = false;
 
-	
+
 	public PreArmCheck(MavlinkConnection connection, int droneID) {
 		super(connection, droneID);
-		
+
 		/** no command specified, on attends que les parametres soient OK */
 		this.streamDataID = MavLinkToolKit.MAVLINK_STREAM_DATA_ID_GpsRawInt;
 	}
@@ -48,55 +49,57 @@ public class PreArmCheck extends MavlinkAction {
 
 	public void propertyChange(PropertyChangeEvent evt) {
 		super.propertyChange(evt);
-		
+
 		String propertyName = evt.getPropertyName();
 
-		
 		/** GPS STATUS */
-		if (propertyName.equals(MavlinkCommunicationModel.GPS_RAW_INT)){
+		if (propertyName.equals(RealDroneModel.GPS_RAW_INT)){
+			MavlinkMessage mavlinkMessage = ((MavlinkMessage)evt.getNewValue());
 
-			GpsRawInt gpsRawIntMessage = (GpsRawInt)evt.getNewValue();
-			GpsFixType gpsFixType = gpsRawIntMessage.fixType().entry();
-			
-			boolean isAllOK = true;
+			if(mavlinkMessage.getOriginSystemId() == this.droneID) {
 
-			int currentGPSFixType = -1;
-			if(gpsFixType == GpsFixType.GPS_FIX_TYPE_NO_GPS) currentGPSFixType = GPS_FIX_TYPE_NO_GPS;
-			if(gpsFixType == GpsFixType.GPS_FIX_TYPE_NO_FIX) currentGPSFixType = GPS_FIX_TYPE_NO_FIX;
-			if(gpsFixType == GpsFixType.GPS_FIX_TYPE_2D_FIX) currentGPSFixType = GPS_FIX_TYPE_2D_FIX;
-			if(gpsFixType == GpsFixType.GPS_FIX_TYPE_3D_FIX) currentGPSFixType = GPS_FIX_TYPE_3D_FIX;
-			if(gpsFixType == GpsFixType.GPS_FIX_TYPE_DGPS) currentGPSFixType = GPS_FIX_TYPE_DGPS;
-			if(gpsFixType == GpsFixType.GPS_FIX_TYPE_RTK_FLOAT) currentGPSFixType = GPS_FIX_TYPE_RTK_FLOAT;
-			if(gpsFixType == GpsFixType.GPS_FIX_TYPE_RTK_FIXED) currentGPSFixType = GPS_FIX_TYPE_RTK_FIXED;
-			if(gpsFixType == GpsFixType.GPS_FIX_TYPE_STATIC) currentGPSFixType = GPS_FIX_TYPE_STATIC;
-			if(gpsFixType == GpsFixType.GPS_FIX_TYPE_PPP) currentGPSFixType = GPS_FIX_TYPE_PPP;
+				GpsRawInt gpsRawIntMessage = (GpsRawInt)mavlinkMessage.getPayload();
+				GpsFixType gpsFixType = gpsRawIntMessage.fixType().entry();
+
+				boolean isAllOK = true;
+
+				int currentGPSFixType = -1;
+				if(gpsFixType == GpsFixType.GPS_FIX_TYPE_NO_GPS) currentGPSFixType = GPS_FIX_TYPE_NO_GPS;
+				if(gpsFixType == GpsFixType.GPS_FIX_TYPE_NO_FIX) currentGPSFixType = GPS_FIX_TYPE_NO_FIX;
+				if(gpsFixType == GpsFixType.GPS_FIX_TYPE_2D_FIX) currentGPSFixType = GPS_FIX_TYPE_2D_FIX;
+				if(gpsFixType == GpsFixType.GPS_FIX_TYPE_3D_FIX) currentGPSFixType = GPS_FIX_TYPE_3D_FIX;
+				if(gpsFixType == GpsFixType.GPS_FIX_TYPE_DGPS) currentGPSFixType = GPS_FIX_TYPE_DGPS;
+				if(gpsFixType == GpsFixType.GPS_FIX_TYPE_RTK_FLOAT) currentGPSFixType = GPS_FIX_TYPE_RTK_FLOAT;
+				if(gpsFixType == GpsFixType.GPS_FIX_TYPE_RTK_FIXED) currentGPSFixType = GPS_FIX_TYPE_RTK_FIXED;
+				if(gpsFixType == GpsFixType.GPS_FIX_TYPE_STATIC) currentGPSFixType = GPS_FIX_TYPE_STATIC;
+				if(gpsFixType == GpsFixType.GPS_FIX_TYPE_PPP) currentGPSFixType = GPS_FIX_TYPE_PPP;
 
 
-			if(this.is3DFixNeeded && currentGPSFixType < GPS_FIX_TYPE_3D_FIX ) {
-				Tools.writeLog("### !!! "+this.getClass().getName() + ": gpsFixType < GPS_FIX_TYPE_3D_FIX (current: " + gpsFixType + ")");
-				isAllOK = false;
+				if(this.is3DFixNeeded && currentGPSFixType < GPS_FIX_TYPE_3D_FIX ) {
+					Tools.writeLog("### !!! "+this.getClass().getName() + ": gpsFixType < GPS_FIX_TYPE_3D_FIX (current: " + gpsFixType + ")");
+					isAllOK = false;
+				}
+
+				if(this.isDGPSFixNeeded && currentGPSFixType < GPS_FIX_TYPE_DGPS ) {
+					Tools.writeLog("### !!! "+this.getClass().getName() + ": gpsFixType < GPS_FIX_TYPE_DGPS (current: " + gpsFixType + ")");
+					isAllOK = false;
+				}
+
+				if(this.isRTKFloatNeeded && currentGPSFixType < GPS_FIX_TYPE_RTK_FLOAT ) {
+					Tools.writeLog("### !!! "+this.getClass().getName() + ": gpsFixType < GPS_FIX_TYPE_RTK_FLOAT (current: " + gpsFixType + ")");
+					isAllOK = false;
+				}
+
+				if(this.isRTKFixNeeded && currentGPSFixType < GPS_FIX_TYPE_RTK_FIXED ) {
+					Tools.writeLog("### !!! "+this.getClass().getName() + ": gpsFixType < GPS_FIX_TYPE_RTK_FIXED (current: " + gpsFixType + ")");
+					isAllOK = false;
+				}
+
+
+				this.setFinished(isAllOK);
+
 			}
-
-			if(this.isDGPSFixNeeded && currentGPSFixType < GPS_FIX_TYPE_DGPS ) {
-				Tools.writeLog("### !!! "+this.getClass().getName() + ": gpsFixType < GPS_FIX_TYPE_DGPS (current: " + gpsFixType + ")");
-				isAllOK = false;
-			}
-
-			if(this.isRTKFloatNeeded && currentGPSFixType < GPS_FIX_TYPE_RTK_FLOAT ) {
-				Tools.writeLog("### !!! "+this.getClass().getName() + ": gpsFixType < GPS_FIX_TYPE_RTK_FLOAT (current: " + gpsFixType + ")");
-				isAllOK = false;
-			}
-
-			if(this.isRTKFixNeeded && currentGPSFixType < GPS_FIX_TYPE_RTK_FIXED ) {
-				Tools.writeLog("### !!! "+this.getClass().getName() + ": gpsFixType < GPS_FIX_TYPE_RTK_FIXED (current: " + gpsFixType + ")");
-				isAllOK = false;
-			}
-
-
-			this.setFinished(isAllOK);
-			
 		}
-		
 	}
 
 }

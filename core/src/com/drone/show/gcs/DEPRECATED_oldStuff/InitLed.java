@@ -1,7 +1,7 @@
 package com.drone.show.gcs.DEPRECATED_oldStuff;
 
 import com.drone.show.gcs.MavLinkToolKit;
-import com.drone.show.gcs.MavlinkCommunicationModel;
+import com.drone.show.gcs.RealDroneModel;
 
 import io.dronefleet.mavlink.MavlinkConnection;
 

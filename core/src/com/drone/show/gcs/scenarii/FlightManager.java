@@ -97,7 +97,7 @@ public class FlightManager  implements PropertyChangeListener {
 		/** to load choreagraphy
 		 * fisrt set mode Stabilize
 		 */
-		timeLine.add( new SetStabilizeMode(connection, MavLinkToolKit.ALL_SYSTEM_ID));
+		//timeLine.add( new SetStabilizeMode(connection, MavLinkToolKit.ALL_SYSTEM_ID));
 		timeLine.add( loadChoreography );
 		
 		/** To start a mission,

@@ -38,22 +38,20 @@ public class GCSThread implements Runnable {
 	public final static long TIMEOUT = 1000;	
 
 	private MavlinkConnection connection;
-	private MavlinkCommunicationModel mavComModel;
 
 	private Timer tryConnection_timer = new Timer(2000);
 	private Timer heartbeat_timer = new Timer(1000);
 	private Timer noStreamDataTimer = new Timer(1000); //delai a partir duquel on estime qu il n y a plus de stream data de recu
 
 
-	
+
 	//TEST 
 	LoadChoreography choreographyManager;
 	FlightManager flightManager;
 	//END TEST
 
 
-	public GCSThread(MavlinkCommunicationModel mavComModel) {
-		this.mavComModel = mavComModel;
+	public GCSThread() {
 	}
 
 	public void run() {
@@ -170,17 +168,20 @@ public class GCSThread implements Runnable {
 	private void mainLoop() {
 
 		//TEST
+		GlobalManager.realWorldModel.addRealDroneModel(1, new RealDroneModel());
+		GlobalManager.realWorldModel.addRealDroneModel(2, new RealDroneModel());
+
 		flightManager = new FlightManager(this.connection);
 		//flightManager.setTestMissionUploadAndArming(1);  //tester avec 2..etc
 		flightManager.setTestMissionUploadAndLaunch();
 		//FIN TEST
-		
+
 
 		@SuppressWarnings("rawtypes")
 		MavlinkMessage message;
 
 
-		
+
 		while (true) {
 
 			try {
@@ -190,84 +191,82 @@ public class GCSThread implements Runnable {
 				 *****************/
 				if( (message = this.connection.next()) != null) {
 
-					
-					/** 
-					 * Check si on recoit de la stream data ou pas
-					 **/
-					if(!(message.getPayload() instanceof Heartbeat)
-							&& !(message.getPayload() instanceof RadioStatus)
-							&& !(message.getPayload() instanceof ParamValue)
-							&& !(message.getPayload() instanceof Timesync)
-							&& !(message.getPayload() instanceof Statustext)
-							) {
-						this.noStreamDataTimer.reset(); //on remet la compteur ON, pendant n sec on estime qu on a de la stream Data
-						this.mavComModel.setStreamData(true);
-					}
-					else if(this.noStreamDataTimer.isFinished()){
-						this.mavComModel.setStreamData(false);
-					}
-					
-					
-
-					if (message.getPayload() instanceof Heartbeat) {
-
-						Heartbeat heartbeat = (Heartbeat)message.getPayload();
-						this.mavComModel.setHeartbeat(heartbeat);
-
-					}else if (message.getPayload() instanceof LocalPositionNed) {
-
-						LocalPositionNed localPositionNed = (LocalPositionNed)message.getPayload();
-						mavComModel.setLocalPositionNed(localPositionNed);
-
-					}else if (message.getPayload() instanceof GpsRawInt) {
-
-						GpsRawInt gpsRawInt = (GpsRawInt)message.getPayload();
-						this.mavComModel.setGpsRawInt(gpsRawInt);
-
-					}else if (message.getPayload() instanceof HomePosition) {
-
-						HomePosition homePosition = (HomePosition)message.getPayload();
-						mavComModel.setHomePosition(homePosition);
-					}
-					else if (message.getPayload() instanceof Statustext) {
-						
-						Statustext statusText = (Statustext)message.getPayload();
-						mavComModel.setStatusText(statusText.text());
-
-					}
-					else if (message.getPayload() instanceof EkfStatusReport) {
-						
-						EkfStatusReport ekfStatusReport = (EkfStatusReport)message.getPayload();
-						mavComModel.setEkfStatusReport(ekfStatusReport);
-						
-					}
-					else if (message.getPayload() instanceof CommandAck) {
-
-						CommandAck commandAck = (CommandAck)message.getPayload();
-						this.mavComModel.setCommandAck(commandAck);
-
-					}
-					else if (message.getPayload() instanceof MissionAck) {
-
-						MissionAck missionAck = (MissionAck)message.getPayload();
-						this.mavComModel.setMissionAck(missionAck);
-
-					}
-					else if (message.getPayload() instanceof ParamValue) {
-
-						ParamValue paramValue = (ParamValue)message.getPayload();
-						this.mavComModel.setParamValue(paramValue);
-
-					}
-					else if (message.getPayload() instanceof MissionRequest) {
-						
-						MissionRequest missionRequest = (MissionRequest)message.getPayload();
-						this.mavComModel.setMissionRequest(missionRequest);
-
-					}
 
 					if(GlobalManager.ISDEBUG) {
-						Tools.writeLog("(received) "+message.getPayload().toString());
+						Tools.writeLog("(received) "+message.toString());
+					}
+
+
+					/**
+					 * Les radio SIK envoient elle meme une telemetrie sr leur etat (est ce qu on peut desactiver?)
+					 * WARNING : originSystemId=51, originComponentId=68
+					 * (received) MavlinkMessage{originSystemId=51, originComponentId=68, payload=RadioStatus{rssi=170, remrssi=170, txbuf=100, noise=94, remnoise=87, rxerrors=1942, fixed=4367}}
+					 */
+					//TODO: temporaire tant qu on est en dessosu de 51 drones....
+					if(message.getOriginSystemId() <= GlobalManager.realWorldModel.realDroneModels.size()) {
+
+
+						/** On popule le droneModel correspondant au systemID
+						 * sytemId from 1 to N
+						 **/
+						RealDroneModel realDroneModel = GlobalManager.realWorldModel.getRealDroneModel( message.getOriginSystemId() );
+
+						/** 
+						 * Check si on recoit de la stream data ou pas
+						 **/
+						if(!(message.getPayload() instanceof Heartbeat)
+								&& !(message.getPayload() instanceof RadioStatus)
+								&& !(message.getPayload() instanceof ParamValue)
+								&& !(message.getPayload() instanceof Timesync)
+								&& !(message.getPayload() instanceof Statustext)
+								) {
+							this.noStreamDataTimer.reset(); //on remet la compteur ON, pendant n sec on estime qu on a de la stream Data
+							GlobalManager.realWorldModel.setStreamData(true);
+						}
+						else if(this.noStreamDataTimer.isFinished()){
+							GlobalManager.realWorldModel.setStreamData(false);
+						}
+
+
+
+						if (message.getPayload() instanceof Heartbeat) {
+							realDroneModel.setHeartbeat(message);
+
+						}else if (message.getPayload() instanceof LocalPositionNed) {
+							realDroneModel.setLocalPositionNed(message);
+
+						}else if (message.getPayload() instanceof GpsRawInt) {
+							realDroneModel.setGpsRawInt(message);
+
+						}else if (message.getPayload() instanceof HomePosition) {
+							realDroneModel.setHomePosition(message);
+						}
+						else if (message.getPayload() instanceof Statustext) {
+							realDroneModel.setStatusText(message);
+
+						}
+						else if (message.getPayload() instanceof EkfStatusReport) {
+							realDroneModel.setEkfStatusReport(message);
+
+						}
+						else if (message.getPayload() instanceof CommandAck) {
+							realDroneModel.setCommandAck(message);
+
+						}
+						else if (message.getPayload() instanceof MissionAck) {
+							realDroneModel.setMissionAck(message);
+
+						}
+						else if (message.getPayload() instanceof ParamValue) {
+							realDroneModel.setParamValue(message);
+
+						}
+						else if (message.getPayload() instanceof MissionRequest) {
+							realDroneModel.setMissionRequest(message);
+
+						}
+						
+						
 					}
 
 
@@ -280,19 +279,19 @@ public class GCSThread implements Runnable {
 				 *****************/
 				if(this.heartbeat_timer.isFinished()) {
 					this.heartbeat_timer.reset();
-					
+
 					MavLinkToolKit.sendCommand(connection, MavLinkToolKit.heartbeat()); //Must be sent to all DRONEs every time (!!! OBLIGATOIRE !!!)
 
 				}
-				
-				
+
+
 				//TEST
 				//MavLinkToolKit.sendCommand(connection, MavLinkToolKit.requestStreamData(MavLinkToolKit.MAVLINK_STREAM_DATA_ID_EkfStatusReport));
 				//MavLinkToolKit.sendCommand(connection, MavLinkToolKit.stopAllStreamData());
 				//choreographyManager.update();
 				flightManager.update();
 				//END TEST
-				
+
 
 			} catch (Exception e) {
 				e.printStackTrace();

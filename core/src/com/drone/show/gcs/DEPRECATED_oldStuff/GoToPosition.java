@@ -3,7 +3,7 @@ package com.drone.show.gcs.DEPRECATED_oldStuff;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector3;
 import com.drone.show.gcs.MavLinkToolKit;
-import com.drone.show.gcs.MavlinkCommunicationModel;
+import com.drone.show.gcs.RealDroneModel;
 import com.drone.show.gcs.DEPRECATED_oldStuff.MavlinkAction.MavlinkActionType;
 import com.drone.show.generic.Tools;
 
@@ -24,7 +24,7 @@ public class GoToPosition extends MavlinkAction {
 	Vector3 targetPosition; //relative a la position de depart HOME du drone en m
 
 
-	public GoToPosition(MavlinkConnection connection, MavlinkCommunicationModel droneModel, Vector3 targetPosition, float speed_) {
+	public GoToPosition(MavlinkConnection connection, RealDroneModel droneModel, Vector3 targetPosition, float speed_) {
 //		super(MavlinkActionType.GOTO_POSITION, connection, droneModel);
 		super(null, connection, droneModel);
 

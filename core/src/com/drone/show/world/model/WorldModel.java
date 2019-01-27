@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.badlogic.gdx.math.Vector3;
-import com.drone.show.gcs.MavlinkCommunicationModel;
 
 
 public class WorldModel implements PropertyChangeListener {

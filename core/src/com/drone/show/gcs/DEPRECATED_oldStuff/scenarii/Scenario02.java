@@ -1,6 +1,6 @@
 package com.drone.show.gcs.DEPRECATED_oldStuff.scenarii;
 
-import com.drone.show.gcs.MavlinkCommunicationModel;
+import com.drone.show.gcs.RealDroneModel;
 import com.drone.show.gcs.DEPRECATED_oldStuff.Arm;
 import com.drone.show.gcs.DEPRECATED_oldStuff.GuidedMode;
 import com.drone.show.gcs.DEPRECATED_oldStuff.InitLed;

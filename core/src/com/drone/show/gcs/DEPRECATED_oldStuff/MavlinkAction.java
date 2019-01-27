@@ -1,7 +1,7 @@
 package com.drone.show.gcs.DEPRECATED_oldStuff;
 
 import com.drone.show.gcs.MavLinkToolKit;
-import com.drone.show.gcs.MavlinkCommunicationModel;
+import com.drone.show.gcs.RealDroneModel;
 import com.drone.show.generic.Tools;
 
 import io.dronefleet.mavlink.MavlinkConnection;
@@ -39,14 +39,14 @@ public abstract class MavlinkAction {
 	private MavlinkConnection connection;
 	private CommandAck commandAck; //Commande bien recu par le drone, le current move a demarré
 	private boolean isCommandAcknowledge;
-	private MavlinkCommunicationModel mavComModel;
+	private RealDroneModel mavComModel;
 
 	private long send_command_interval; //in ms
 	private long send_command_timer;
 
 	
 	
-	public MavlinkAction(MavlinkActionType mavlinkActionType, MavlinkConnection connection, MavlinkCommunicationModel mavComModel) {
+	public MavlinkAction(MavlinkActionType mavlinkActionType, MavlinkConnection connection, RealDroneModel mavComModel) {
 
 		this.setMavlinkActionType(mavlinkActionType);
 		this.setFinished(false);
@@ -142,11 +142,11 @@ public abstract class MavlinkAction {
 		this.send_command_timer = send_command_timer;
 	}
 
-	public MavlinkCommunicationModel getMavComModel() {
+	public RealDroneModel getMavComModel() {
 		return mavComModel;
 	}
 
-	public void setMavComModel(MavlinkCommunicationModel mavComModel) {
+	public void setMavComModel(RealDroneModel mavComModel) {
 		this.mavComModel = mavComModel;
 	}
 

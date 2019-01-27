@@ -30,7 +30,8 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.I18NBundle;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.drone.show.gcs.MavlinkCommunicationModel;
+import com.drone.show.gcs.RealDroneModel;
+import com.drone.show.gcs.RealWorldModel;
 import com.drone.show.generic.AssetsLoader;
 import com.drone.show.generic.FontManager;
 import com.drone.show.generic.SoundManager;
@@ -80,7 +81,7 @@ public class GlobalManager {
 	/** Shared data with Thread GCS
 	 * for the current selected drone
 	 **/
-	public static MavlinkCommunicationModel realWorldDroneModel;
+	public static RealWorldModel realWorldModel;
 
 
 
@@ -137,7 +138,7 @@ public class GlobalManager {
 		
 		GlobalManager.applicationModel = new ApplicationModel();
 		
-		GlobalManager.realWorldDroneModel = new MavlinkCommunicationModel();
+		GlobalManager.realWorldModel = new RealWorldModel();
 	}
 
 

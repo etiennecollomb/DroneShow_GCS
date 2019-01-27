@@ -11,14 +11,17 @@ import com.drone.show.GlobalManager;
 import com.drone.show.MyDroneShow;
 import com.drone.show.gcs.GCSThread;
 import com.drone.show.gcs.MavLinkToolKit;
-import com.drone.show.gcs.MavlinkCommunicationModel;
+import com.drone.show.gcs.RealDroneModel;
 import com.drone.show.gcs.actions.LoadChoreography;
 import com.drone.show.hud.popups.ScenariosPopup;
 import com.drone.show.hud.popups.TelemetryPopup;
 
+import io.dronefleet.mavlink.MavlinkMessage;
+import io.dronefleet.mavlink.ardupilotmega.EkfStatusReport;
 import io.dronefleet.mavlink.common.GpsRawInt;
 import io.dronefleet.mavlink.common.Heartbeat;
 import io.dronefleet.mavlink.common.MavModeFlag;
+import io.dronefleet.mavlink.common.Statustext;
 
 public class ApplicationModel implements PropertyChangeListener {
 
@@ -55,8 +58,9 @@ public class ApplicationModel implements PropertyChangeListener {
 		if(GlobalManager.ISDEBUG) System.out.println("ApplicationModel received propertyName : "+propertyName);
 
 		/** Telemetry Popup */
-		if (propertyName.equals(MavlinkCommunicationModel.HEARTBEAT)){
-			Heartbeat heartbeat = (Heartbeat)evt.getNewValue();
+		if (propertyName.equals(RealDroneModel.HEARTBEAT)){
+			MavlinkMessage mavlinkMessage = (MavlinkMessage)evt.getNewValue();
+			Heartbeat heartbeat = (Heartbeat)mavlinkMessage.getPayload();
 			
 			/** Mode Text */
 			if(heartbeat.customMode() == MavLinkToolKit.STABILIZE_CUSTOM_MODE) {
@@ -81,9 +85,9 @@ public class ApplicationModel implements PropertyChangeListener {
 			}
 			
 		}
-		else if (propertyName.equals(MavlinkCommunicationModel.GPS_RAW_INT)){
-			
-			GpsRawInt gpsRawInt = (GpsRawInt)evt.getNewValue();
+		else if (propertyName.equals(RealDroneModel.GPS_RAW_INT)){
+			MavlinkMessage mavlinkMessage = (MavlinkMessage)evt.getNewValue();
+			GpsRawInt gpsRawInt = (GpsRawInt)mavlinkMessage.getPayload();
 
 			/** Number Of Satellite */
 			this.pcs.firePropertyChange(TelemetryPopup.NUMBER_OF_SATTELITES_TEXT, null, ""+gpsRawInt.satellitesVisible() );
@@ -92,11 +96,15 @@ public class ApplicationModel implements PropertyChangeListener {
 			this.pcs.firePropertyChange(TelemetryPopup.GPS_FIX_TYPE_TEXT, null, ""+gpsRawInt.fixType().entry().name());
 			
 		}
-		else if (propertyName.equals(MavlinkCommunicationModel.STATUS)){
-			this.pcs.firePropertyChange(TelemetryPopup.STATUS_TEXT, ""+evt.getOldValue(), ""+evt.getNewValue());
+		else if (propertyName.equals(RealDroneModel.STATUS)){
+			MavlinkMessage mavlinkMessage = (MavlinkMessage)evt.getNewValue();
+			Statustext statustext = (Statustext)mavlinkMessage.getPayload();
+			this.pcs.firePropertyChange(TelemetryPopup.STATUS_TEXT, null, ""+statustext.text());
 		}
-		else if (propertyName.equals(MavlinkCommunicationModel.EKF_STATUS)){
-			this.pcs.firePropertyChange(TelemetryPopup.EKF_STATUS_TEXT, evt.getOldValue(), evt.getNewValue());
+		else if (propertyName.equals(RealDroneModel.EKF_STATUS)){
+			MavlinkMessage mavlinkMessage = (MavlinkMessage)evt.getNewValue();
+			EkfStatusReport ekfStatusReport = (EkfStatusReport)mavlinkMessage.getPayload();
+			this.pcs.firePropertyChange(TelemetryPopup.EKF_STATUS_TEXT, null, ekfStatusReport);
 		}
 		
 		/** Scenario Popup */
