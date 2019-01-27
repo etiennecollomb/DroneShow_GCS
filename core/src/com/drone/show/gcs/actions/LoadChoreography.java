@@ -43,7 +43,7 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 
 
 	private MavlinkConnection connection;
-	
+
 	/** Pour etre sur qu on recoit pas des MissionAck de la commande precedent MissionClear
 	 * alors qu on est sur la sequence REQUEST_ITEM qui retourne un MissionAck aussi
 	 */
@@ -111,11 +111,11 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 	public void prepareNewMission() {
 
 		this.isAlive = false; //will trigger the startListeningEvents()	on the right RealDroneModel
-		
+
 		this.setStabilizeMode = new SetStabilizeMode(this.connection, this.droneID);
 		this.stopAllStreamData = new StopAllStreamData(this.connection);
 		this.missionClearAll = new MissionClearAll(this.connection, this.droneID);
-		
+
 		/** on rajoute 1 waypoint , car le premier est la Home Position
 		 * Toujours overrided par ardupilot quand le drone Arm
 		 **/
@@ -124,14 +124,14 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 		int numberOfWaypoint = waypoints.size();
 		numberOfWaypoint = numberOfWaypoint + 1;
 		this.missionCount = new MissionCount(connection, this.droneID, numberOfWaypoint);
-		
+
 		this.isMissionLoaded = false;
 
 		Tools.writeLog("     #### Choerography START : new Mission upload ####     ");
 	}
 
-	
-	
+
+
 	public static Choreography getChoreographyFromJson(String filename) {
 
 		FileHandle handle = Gdx.files.internal(filename);
@@ -168,21 +168,21 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 				if(!this.setStabilizeMode.isFinished()) {
 					this.setStabilizeMode.update();
 				}
-				
+
 				/** next msg a envoyer : Mission Clear */
 				else if(!this.missionClearAll.isFinished()) {
 					this.missionClearAll.update();
 					this.missionClearTimer.reset(); //on initailise le timer pour la prochaine commande
-					
+
 					/** Si mission clear est fini */
 					if(this.missionClearAll.isFinished()) {
 						Tools.writeLog("     #### Mission is Cleared (DroneId: "+ this.droneID +") ####     ");
 					}
 				}
-				
+
 				/** next msg a envoyer : Mission Count */
 				else if(!this.missionCount.isFinished()) {
-						this.missionCount.update();
+					this.missionCount.update();
 				}
 
 				/** les msgs suivants : les waypoints, sont traites par notification des PropertiesChangeListener*/
@@ -192,16 +192,15 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 				if(this.isMissionLoaded) {
 
 					this.stopListeningEvents(); //on se desengage du property listenner du RealDroneModel qui n est plus utilise
-					
-					this.droneID = this.droneID + 1;
 
 					/** a t on fini de tout charger sur tous les drones? */
-					if(this.droneID > this.numberOfDrones -1) {
+					if(this.droneID + 1 > this.numberOfDrones) {
 						this.setFinished(true);
 						Tools.writeLog("     #### Choerography END : Choreography loaded. ####     ");
 					}
 					/** sinon on enchaine sur la mission suivante */
 					else {
+						this.droneID = this.droneID + 1;
 						this.prepareNewMission();
 					}
 
@@ -225,49 +224,55 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 
 		if (propertyName.equals(RealDroneModel.MISSION_REQUEST)){
 			MavlinkMessage mavlinkMessage = ((MavlinkMessage)evt.getNewValue());
-			MissionRequest missionRequest = (MissionRequest)mavlinkMessage.getPayload();
 
-			//First one : The first mission sequence number (seq==0) is populated with the home position of the vehicle instead of the first mission item.
-			//Will be overrided by the home position
-			if(missionRequest.seq() == 0) {
-				MavLinkToolKit.sendCommand(connection, MavLinkToolKit.missionItem(this.droneID, missionRequest.seq(), 0,0,0));
-			}
-			else {
+//			if(mavlinkMessage.getOriginSystemId() == this.droneID) {
+				MissionRequest missionRequest = (MissionRequest)mavlinkMessage.getPayload();
 
-				//missionRequest.seq() part bien de 0 et non de 1 pour le premier waypoint
-				//mais le premier waypoint est la home position, overrided by ardupilot qd le drone ARM
-				int missionID = this.droneID - 1;
-				int waypointID = missionRequest.seq()-1;
-				Waypoint wp = this.choreography.missions.get( missionID ).waypoints.get( waypointID );
-
-				//Second one : takeoff
-				//Takeoff (either from ground or by hand-launch). It should be the first command of nearly all Plane and Copter missions.
-				if(missionRequest.seq() == 1) {
-					MavLinkToolKit.sendCommand(connection, MavLinkToolKit.missionTakeOff(this.droneID, missionRequest.seq(), wp.Z_in_meter));
+				//First one : The first mission sequence number (seq==0) is populated with the home position of the vehicle instead of the first mission item.
+				//Will be overrided by the home position
+				if(missionRequest.seq() == 0) {
+					MavLinkToolKit.sendCommand(connection, MavLinkToolKit.missionItem(this.droneID, missionRequest.seq(), 0,0,0));
 				}
 				else {
-					float wpLatitude = Tools.add_distance_to_Latitude(this.origLatitude, wp.X_in_meter);
-					float wpLongitude = Tools.add_distance_to_Longitude(this.origLongitude, wp.Y_in_meter);
-					MavLinkToolKit.sendCommand(connection, MavLinkToolKit.missionItem(this.droneID, missionRequest.seq(), wpLatitude, wpLongitude, wp.Z_in_meter));//seq, latitude, longitude, altitude));
+
+					//missionRequest.seq() part bien de 0 et non de 1 pour le premier waypoint
+					//mais le premier waypoint est la home position, overrided by ardupilot qd le drone ARM
+					int missionID = this.droneID - 1;
+					int waypointID = missionRequest.seq()-1;
+					Waypoint wp = this.choreography.missions.get( missionID ).waypoints.get( waypointID );
+
+					//Second one : takeoff
+					//Takeoff (either from ground or by hand-launch). It should be the first command of nearly all Plane and Copter missions.
+					if(missionRequest.seq() == 1) {
+						MavLinkToolKit.sendCommand(connection, MavLinkToolKit.missionTakeOff(this.droneID, missionRequest.seq(), wp.Z_in_meter));
+					}
+					else {
+						float wpLatitude = Tools.add_distance_to_Latitude(this.origLatitude, wp.X_in_meter);
+						float wpLongitude = Tools.add_distance_to_Longitude(this.origLongitude, wp.Y_in_meter);
+						MavLinkToolKit.sendCommand(connection, MavLinkToolKit.missionItem(this.droneID, missionRequest.seq(), wpLatitude, wpLongitude, wp.Z_in_meter));//seq, latitude, longitude, altitude));
+					}
 				}
-			}
+//			}
 
 		}
 		else if (propertyName.equals(RealDroneModel.MISSION_ACK)){
 			MavlinkMessage mavlinkMessage = ((MavlinkMessage)evt.getNewValue());
-			MissionAck missionAck = (MissionAck)mavlinkMessage.getPayload();
 
-			//example : MissionAck{targetSystem=255, targetComponent=0, type=EnumValue{value=0, entry=MAV_MISSION_ACCEPTED}, missionType=null}
-			if(missionAck.type().entry() == MavMissionResult.MAV_MISSION_ACCEPTED) {
+//			if(mavlinkMessage.getOriginSystemId() == this.droneID) {
+				MissionAck missionAck = (MissionAck)mavlinkMessage.getPayload();
 
-				//on a bien fini le mission clear depuis un moment qui retourne aussi cette valeur
-				if(missionClearTimer.isFinished()) {
-					/** fin de load de mission */
-					this.isMissionLoaded = true;
-					Tools.writeLog("     #### Mission Loaded (DroneId: "+ this.droneID +") ####     ");
+				//example : MissionAck{targetSystem=255, targetComponent=0, type=EnumValue{value=0, entry=MAV_MISSION_ACCEPTED}, missionType=null}
+				if(missionAck.type().entry() == MavMissionResult.MAV_MISSION_ACCEPTED) {
+
+					//on a bien fini le mission clear depuis un moment qui retourne aussi cette valeur
+					if(missionClearTimer.isFinished()) {
+						/** fin de load de mission */
+						this.isMissionLoaded = true;
+						Tools.writeLog("     #### Mission Loaded (DroneId: "+ this.droneID +") ####     ");
+					}
+
 				}
-
-			}
+//			}
 		}
 
 	}

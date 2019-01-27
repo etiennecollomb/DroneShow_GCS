@@ -85,7 +85,7 @@ public class FlightManager  implements PropertyChangeListener {
 		 */
 		float origLatitude = 22.275667f;
 		float origLongitude = 114.173414f;
-		LoadChoreography loadChoreography = new LoadChoreography(this.connection, "choreographies/choreoPattern_1_Drone_002.json", origLatitude, origLongitude);
+		LoadChoreography loadChoreography = new LoadChoreography(this.connection, "choreographies/choreoPattern_2_Drones_001.json", origLatitude, origLongitude);
 		
 		timeLine.reset();
 		
