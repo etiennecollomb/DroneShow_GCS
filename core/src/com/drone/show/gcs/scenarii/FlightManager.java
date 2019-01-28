@@ -82,7 +82,7 @@ public class FlightManager  implements PropertyChangeListener {
 		 */
 		float origLatitude = 22.275667f;
 		float origLongitude = 114.173414f;
-		LoadChoreography loadChoreography = new LoadChoreography(this.connection, "choreographies/1_Drones_001.json", origLatitude, origLongitude);
+		LoadChoreography loadChoreography = new LoadChoreography(this.connection, "choreographies/1_Drone_001.json", origLatitude, origLongitude);
 		
 		timeLine.reset();
 		
@@ -95,14 +95,33 @@ public class FlightManager  implements PropertyChangeListener {
 		 * fisrt set mode Stabilize
 		 */
 		//timeLine.add( new SetStabilizeMode(connection, MavLinkToolKit.ALL_SYSTEM_ID));
-		timeLine.add( loadChoreography );
+//		timeLine.add( loadChoreography );
 		
 		/** To start a mission,
-		 * first set mode Auto
-		 * second start misssion
+		 * Arm first
+		 * then set mode Auto
+		 * then start misssion
+		 * cf condition in ardupilot code cui dessous (https://github.com/ArduPilot/ardupilot/blob/master/ArduCopter/GCS_Mavlink.cpp)
 		 */
-		timeLine.add( new SetAutoMode(this.connection, 1));
-		timeLine.add( new StartMission(this.connection, 1));
+
+		/*
+		 #if MODE_AUTO_ENABLED == ENABLED
+    	case MAV_CMD_MISSION_START:
+        if (copter.motors->armed() && copter.set_mode(AUTO, MODE_REASON_GCS_COMMAND)) {
+            copter.set_auto_armed(true);
+            if (copter.mode_auto.mission.state() != AP_Mission::MISSION_RUNNING) {
+                copter.mode_auto.mission.start_or_resume();
+            }
+            return MAV_RESULT_ACCEPTED;
+        }
+        return MAV_RESULT_FAILED;
+		#endif
+		*/
+		//To ALL ...
+		timeLine.add( new SetStabilizeMode(this.connection, 0));
+		timeLine.add( new Arm(this.connection, 0));
+		timeLine.add( new SetAutoMode(this.connection, 0));
+		timeLine.add( new StartMission(this.connection, 0));
 	}
 		
 		
