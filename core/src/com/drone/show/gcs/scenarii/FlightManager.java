@@ -3,8 +3,6 @@ package com.drone.show.gcs.scenarii;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import com.drone.show.GlobalManager;
-import com.drone.show.gcs.MavLinkToolKit;
 import com.drone.show.gcs.actions.Arm;
 import com.drone.show.gcs.actions.LoadChoreography;
 import com.drone.show.gcs.actions.PreArmCheck;
@@ -12,7 +10,6 @@ import com.drone.show.gcs.actions.SetAutoMode;
 import com.drone.show.gcs.actions.SetLandMode;
 import com.drone.show.gcs.actions.SetStabilizeMode;
 import com.drone.show.gcs.actions.StartMission;
-import com.drone.show.gcs.actions.StopAllStreamData;
 import com.drone.show.gcs.actions.Wait;
 import com.drone.show.generic.Tools;
 
@@ -85,7 +82,7 @@ public class FlightManager  implements PropertyChangeListener {
 		 */
 		float origLatitude = 22.275667f;
 		float origLongitude = 114.173414f;
-		LoadChoreography loadChoreography = new LoadChoreography(this.connection, "choreographies/choreoPattern_2_Drones_001.json", origLatitude, origLongitude);
+		LoadChoreography loadChoreography = new LoadChoreography(this.connection, "choreographies/1_Drones_001.json", origLatitude, origLongitude);
 		
 		timeLine.reset();
 		
@@ -104,8 +101,8 @@ public class FlightManager  implements PropertyChangeListener {
 		 * first set mode Auto
 		 * second start misssion
 		 */
-//		timeLine.add( new SetAutoMode(this.connection, droneID));
-//		timeLine.add( new StartMission(this.connection, droneID));
+		timeLine.add( new SetAutoMode(this.connection, 1));
+		timeLine.add( new StartMission(this.connection, 1));
 	}
 		
 		
