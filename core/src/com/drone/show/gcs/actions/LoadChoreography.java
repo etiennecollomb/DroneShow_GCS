@@ -264,7 +264,7 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 				MissionAck missionAck = (MissionAck)mavlinkMessage.getPayload();
 
 				//example : MissionAck{targetSystem=255, targetComponent=0, type=EnumValue{value=0, entry=MAV_MISSION_ACCEPTED}, missionType=null}
-				if(missionAck.type().entry() == MavMissionResult.MAV_MISSION_ACCEPTED) {
+				if(missionAck.type().entry() == MavMissionResult.MAV_MISSION_ACCEPTED && !this.isMissionLoaded) {
 
 					//on a bien fini le mission clear depuis un moment qui retourne aussi cette valeur
 					if(missionClearTimer.isFinished()) {
@@ -290,7 +290,7 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 				if(paramValue.paramId().equals("MIS_TOTAL")) {
 
 					/** Permet de verifier qu on a bien tous les points clear */
-					if(paramValue.paramValue() == this.numberOfWaypointOfCurrentMission) {
+					if(paramValue.paramValue() == this.numberOfWaypointOfCurrentMission && !this.isMissionLoaded) {
 						this.isMissionLoaded = true;
 						Tools.writeLog("     #### Mission Loaded (DroneId: "+ this.droneID +") ####     ");
 					}
