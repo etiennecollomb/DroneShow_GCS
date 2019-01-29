@@ -59,6 +59,7 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 	SetStabilizeMode setStabilizeMode;
 	MissionClearAll missionClearAll;
 	MissionCount missionCount;
+	int numberOfWaypointOfCurrentMission;
 	boolean isMissionLoaded; //est ce que le drone courant a load sa mission?
 
 
@@ -122,8 +123,9 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 		int missionID = this.droneID - 1;
 		List<Waypoint> waypoints = this.choreography.missions.get( missionID ).waypoints;
 		int numberOfWaypoint = waypoints.size();
-		numberOfWaypoint = numberOfWaypoint + 1;
-		this.missionCount = new MissionCount(connection, this.droneID, numberOfWaypoint);
+		this.numberOfWaypointOfCurrentMission = numberOfWaypoint + 1;
+		
+		this.missionCount = new MissionCount(connection, this.droneID, this.numberOfWaypointOfCurrentMission);
 
 		this.isMissionLoaded = false;
 
@@ -225,7 +227,7 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 		if (propertyName.equals(RealDroneModel.MISSION_REQUEST)){
 			MavlinkMessage mavlinkMessage = ((MavlinkMessage)evt.getNewValue());
 
-//			if(mavlinkMessage.getOriginSystemId() == this.droneID) {
+			if(mavlinkMessage.getOriginSystemId() == this.droneID) {
 				MissionRequest missionRequest = (MissionRequest)mavlinkMessage.getPayload();
 
 				//First one : The first mission sequence number (seq==0) is populated with the home position of the vehicle instead of the first mission item.
@@ -252,13 +254,13 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 						MavLinkToolKit.sendCommand(connection, MavLinkToolKit.missionItem(this.droneID, missionRequest.seq(), wpLatitude, wpLongitude, wp.Z_in_meter));//seq, latitude, longitude, altitude));
 					}
 				}
-//			}
+			}
 
 		}
 		else if (propertyName.equals(RealDroneModel.MISSION_ACK)){
 			MavlinkMessage mavlinkMessage = ((MavlinkMessage)evt.getNewValue());
 
-//			if(mavlinkMessage.getOriginSystemId() == this.droneID) {
+			if(mavlinkMessage.getOriginSystemId() == this.droneID) {
 				MissionAck missionAck = (MissionAck)mavlinkMessage.getPayload();
 
 				//example : MissionAck{targetSystem=255, targetComponent=0, type=EnumValue{value=0, entry=MAV_MISSION_ACCEPTED}, missionType=null}
@@ -272,7 +274,29 @@ public class LoadChoreography extends Action implements PropertyChangeListener{
 					}
 
 				}
-//			}
+			}
+		}
+		/** pour savoir si la mission est bien upload on peut aussi checker le ParamValue 
+		 * Parfois le mission ack n ets pas renvoye par le ardupilot ?
+		 * TODO: checker pourquoi quand on a 2 drones le second ne renvoie pas de mission ack alors que la mission est bien chargee....
+		 */
+		else if (propertyName.equals(RealDroneModel.PARAM_VALUE)){
+			MavlinkMessage mavlinkMessage = ((MavlinkMessage)evt.getNewValue());
+			
+			if(mavlinkMessage.getOriginSystemId() == this.droneID) {
+				ParamValue paramValue = (ParamValue)mavlinkMessage.getPayload();
+
+				/** Permet de connaitre le nombre de waypoint deja load dans l'ardupilot */
+				if(paramValue.paramId().equals("MIS_TOTAL")) {
+
+					/** Permet de verifier qu on a bien tous les points clear */
+					if(paramValue.paramValue() == this.numberOfWaypointOfCurrentMission) {
+						this.isMissionLoaded = true;
+						Tools.writeLog("     #### Mission Loaded (DroneId: "+ this.droneID +") ####     ");
+					}
+				}
+
+			}
 		}
 
 	}

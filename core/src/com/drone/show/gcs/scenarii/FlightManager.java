@@ -53,19 +53,11 @@ public class FlightManager  implements PropertyChangeListener {
 	
 	
 
-	public void setTestMissionUploadAndArming(int droneID) {
+	public void setTestArming(int droneID) {
 
-		/** For testing Mission Upload
-		 * Hong Kong, Appart Matthieu (2001)
-		 */
-		float origLatitude = 22.275667f;
-		float origLongitude = 114.173414f;
-		LoadChoreography loadChoreography = new LoadChoreography(this.connection, "choreographies/choreoPattern_1_Drone_001.json", origLatitude, origLongitude);
-		
 		timeLine.reset();
 
 		timeLine.add( new SetStabilizeMode(connection, droneID));
-		timeLine.add( loadChoreography );
 		timeLine.add( new PreArmCheck(connection, droneID));
 		timeLine.add( new Arm(connection, droneID));
 		timeLine.add( new Wait(3000f)); //3 sec
@@ -75,27 +67,31 @@ public class FlightManager  implements PropertyChangeListener {
 
 
 
-	public void setTestMissionUploadAndLaunch() {
+	public void setMissionUpload() {
 	
-		/** For testing Mission Upload
-		 * Hong Kong, Appart Matthieu (2001)
+		/** 
+		 * Origine Point
 		 */
 		float origLatitude = 22.275667f;
 		float origLongitude = 114.173414f;
+		/**
+		 * Choreography
+		 */
 		LoadChoreography loadChoreography = new LoadChoreography(this.connection, "choreographies/1_Drone_001.json", origLatitude, origLongitude);
 		
 		timeLine.reset();
-		
-		//TEST
-//		timeLine.add( new SetStabilizeMode(connection, 2));
-//		timeLine.add( new SetLandMode(connection, 2));
-		//FIN TEST
-
+	
 		/** to load choreagraphy
 		 * fisrt set mode Stabilize
 		 */
-		//timeLine.add( new SetStabilizeMode(connection, MavLinkToolKit.ALL_SYSTEM_ID));
-//		timeLine.add( loadChoreography );
+		timeLine.add( loadChoreography );
+		
+		
+	}
+		
+	
+	
+	public void setStartMission() {
 		
 		/** To start a mission,
 		 * Arm first
@@ -106,23 +102,25 @@ public class FlightManager  implements PropertyChangeListener {
 
 		/*
 		 #if MODE_AUTO_ENABLED == ENABLED
-    	case MAV_CMD_MISSION_START:
-        if (copter.motors->armed() && copter.set_mode(AUTO, MODE_REASON_GCS_COMMAND)) {
-            copter.set_auto_armed(true);
-            if (copter.mode_auto.mission.state() != AP_Mission::MISSION_RUNNING) {
-                copter.mode_auto.mission.start_or_resume();
-            }
-            return MAV_RESULT_ACCEPTED;
-        }
+	    	case MAV_CMD_MISSION_START:
+	        if (copter.motors->armed() && copter.set_mode(AUTO, MODE_REASON_GCS_COMMAND)) {
+           		copter.set_auto_armed(true);
+	            if (copter.mode_auto.mission.state() != AP_Mission::MISSION_RUNNING) {
+	                copter.mode_auto.mission.start_or_resume();
+	            }
+	            return MAV_RESULT_ACCEPTED;
+        		}
         return MAV_RESULT_FAILED;
 		#endif
 		*/
+		
+		timeLine.reset();
 		//To ALL ...
 		timeLine.add( new SetStabilizeMode(this.connection, 0));
 		timeLine.add( new Arm(this.connection, 0));
 		timeLine.add( new SetAutoMode(this.connection, 0));
 		timeLine.add( new StartMission(this.connection, 0));
-	}
 		
+	}
 		
 }

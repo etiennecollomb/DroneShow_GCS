@@ -172,8 +172,11 @@ public class GCSThread implements Runnable {
 		GlobalManager.realWorldModel.addRealDroneModel(2, new RealDroneModel());
 
 		flightManager = new FlightManager(this.connection);
-		//flightManager.setTestMissionUploadAndArming(1);  //tester avec 2..etc
-		flightManager.setTestMissionUploadAndLaunch();
+		
+		int droneID = 1;
+		flightManager.setTestArming(droneID);
+//		flightManager.setMissionUpload();
+//		flightManager.setStartMission();
 		//FIN TEST
 
 
